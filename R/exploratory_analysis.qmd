@@ -3,3 +3,14 @@ title: "exploratory_analysis"
 format: html
 ---
 
+```{r}
+load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
+```
+
+```{r}
+GSE106608 <- loadIsoformCountMatrix("GSE106608")
+```
+
+```{r}
+GSE208783 <- loadIsoformCountMatrix("GSE208783,GSE208784")
+```
