@@ -3,3 +3,40 @@ title: "exploratory_analysis"
 format: html
 ---
 
+# Setting up data
+
+### Load functions
+
+```{r}
+load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
+```
+
+### Load isoform count matrices
+
+```{r}
+GSE208783_isoform_matrix <- loadIsoformCountMatrix("GSE208783,GSE208784")
+```
+
+```{r}
+GSE106608_isoform_matrix <- loadIsoformCountMatrix("GSE106608")
+```
+
+### Load gene count matrices
+
+```{r}
+GSE208783_gene_matrix <- extractGeneCountMatrixFromIsoCounts(GSE208783_isoform_matrix)
+```
+
+```{r}
+head(GSE208783_gene_matrix)
+```
+
+```{r}
+GSE106608_gene_matrix <- extractGeneCountMatrixFromIsoCounts(GSE106608_isoform_matrix)
+```
+
+```{r}
+head(GSE106608_gene_matrix)
+```
+
+### Load meta data
