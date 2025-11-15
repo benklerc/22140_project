@@ -5,38 +5,22 @@ format: html
 
 # Setting up data
 
-### Load functions
-
 ```{r}
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
+
+isoform_count_08 <-loadIsoformCountMatrix('GSE106608')
+isoform_count_83 <-loadIsoformCountMatrix('GSE208783,GSE208784')
+
+gene_count_08 <- extractGeneCountMatrixFromIsoCounts(isoform_count_08)
+gene_count_83 <- extractGeneCountMatrixFromIsoCounts(isoform_count_83)
+
+isoform_count_08 <- as.data.frame(isoform_count_08)
+isoform_count_83 <- as.data.frame(isoform_count_83)
+
+isoInfo <- read_rds(
+paste0(
+'/home/projects/22140/exam_data/',
+'Homo_sapiens.GRCh38.107.chr_patch_hapl_scaff_tx_info.Rds'
+)
+)
 ```
-
-### Load isoform count matrices
-
-```{r}
-GSE208783_isoform_matrix <- loadIsoformCountMatrix("GSE208783,GSE208784")
-```
-
-```{r}
-GSE106608_isoform_matrix <- loadIsoformCountMatrix("GSE106608")
-```
-
-### Load gene count matrices
-
-```{r}
-GSE208783_gene_matrix <- extractGeneCountMatrixFromIsoCounts(GSE208783_isoform_matrix)
-```
-
-```{r}
-head(GSE208783_gene_matrix)
-```
-
-```{r}
-GSE106608_gene_matrix <- extractGeneCountMatrixFromIsoCounts(GSE106608_isoform_matrix)
-```
-
-```{r}
-head(GSE106608_gene_matrix)
-```
-
-### Load meta data
