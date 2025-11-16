@@ -24,3 +24,33 @@ paste0(
 )
 )
 ```
+
+### Meta data
+
+```{r}
+file_path_08 <- "../data/Template_group6_GSE106608.csv"
+
+metadata_df_08 <- read.table(
+  file_path_08,
+  sep = ",",          
+  header = TRUE,
+  skip = 6,
+  stringsAsFactors = FALSE
+)
+
+head(metadata_df_08)
+```
+
+```{r}
+file_path_83 <- "../data/Template_group6_GSE106608.csv"
+
+metadata_df_83 <- read.table(
+  file_path_83,
+  sep = ",",          
+  header = TRUE,
+  skip = 6,
+  stringsAsFactors = FALSE
+)
+
+head(metadata_df_83)
+```
