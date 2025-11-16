@@ -3,13 +3,7 @@ title: "exploratory_analysis"
 format: html
 ---
 
-# Load Libraries
-
-```{r}
-
-```
-
-# Load Data
+# Setting up data
 
 ```{r}
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
@@ -31,7 +25,7 @@ paste0(
 )
 ```
 
-# Load meta data
+### Meta data
 
 ```{r}
 file_path_08 <- "../data/Template_group6_GSE106608.csv"
