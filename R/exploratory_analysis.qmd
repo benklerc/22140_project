@@ -38,6 +38,8 @@ metadata_df_08 <- read.table(
   stringsAsFactors = FALSE
 )
 
+colnames(metadata_df_08)[5] <- "groups"
+
 head(metadata_df_08)
 ```
 
@@ -51,6 +53,8 @@ metadata_df_83 <- read.table(
   skip = 6,
   stringsAsFactors = FALSE
 )
+
+colnames(metadata_df_83)[5] <- "groups"
 
 head(metadata_df_83)
 ```
