@@ -30,21 +30,22 @@ paste0(
 ```{r}
 file_path_08 <- "../data/Template_group6_GSE106608.csv"
 
-metadata_df_08 <- read.table(
+meta_08 <- read.table(
   file_path_08,
   sep = ",",          
   header = TRUE,
   skip = 6,
   stringsAsFactors = FALSE
 )
+colnames(meta_08)[5] <- "condition"
 
-head(metadata_df_08)
+head(meta_08)
 ```
 
 ```{r}
 file_path_83 <- "../data/Template_group6_GSE106608.csv"
 
-metadata_df_83 <- read.table(
+meta_83 <- read.table(
   file_path_83,
   sep = ",",          
   header = TRUE,
@@ -52,5 +53,111 @@ metadata_df_83 <- read.table(
   stringsAsFactors = FALSE
 )
 
-head(metadata_df_83)
+colnames(meta_83)[5] <- "condition"
+
+head(meta_83)
+```
+
+```{r}
+all(meta_08$sample_id == colnames(gene_count_08))
+```
+
+```{r}
+all(meta_83$sample_id == colnames(gene_count_83))
+```
+
+```{r}
+gene_count_08_filtered <- gene_count_08[, colnames(gene_count_08) %in% meta_08$sample_id]
+```
+
+```{r}
+all(meta_08$sample_id == colnames(gene_count_08_filtered))
+```
+
+```{r}
+library(DESeq2)
+dds_08 <- DESeqDataSetFromMatrix(countData = gene_count_08_filtered,
+                              colData = meta_08,
+                              design = ~ condition)
+
+dds_08
+```
+
+### PCA
+
+```{r}
+plotPCA(rlog(dds_08), intgroup=c("condition"))
+```
+
+### Testing for differential expression
+
+```{r}
+dds_08 <- DESeq(dds_08)
+```
+
+```{r}
+res_08 <- results(dds_08)
+res_08
+```
+
+### Number of significant genes
+
+```{r}
+nrow(gene_count_08)
+```
+
+```{r}
+n_sig_08 <- sum(res_08$padj < 0.05, na.rm = TRUE)
+n_sig_08
+```
+
+473 / 67186 genes were significant in the GSE106608 data.
+
+### Gene Set Enrichment Analysis (Specifically FSC)
+
+```{r}
+library(fgsea)
+library(msigdbr)
+
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_08 <- res_08[,"stat"]
+names(myStats_08) <- rownames(res_08)
+# Remove the ensembl version in the names
+clean_names <- sub("\\.\\d+$", "", names(myStats_08))
+names(myStats_08) <- clean_names
+myStats_08 <- myStats_08[!is.na(myStats_08)]
+myStats_08 <- sort(myStats_08, decreasing = TRUE)
+```
+
+```{r}
+fg_08 <- fgseaMultilevel(pathways = BP_list, stats = myStats_08,
+                      minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_08 <- fg_08 %>%
+  arrange(padj) %>%
+  filter(padj < 0.05)
+nrow(fg_sig_08)
+```
+
+```{r}
+fg_sig_08[1:10]
+```
+
+```{r}
+chosen_pathway <- fg_sig_08$pathway[1]
+plotEnrichment(BP_list[[chosen_pathway]], myStats_08) +
+  ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway))
+```
+
+```{r}
+leading <- fg_sig_08$leadingEdge[[1]]
+first_genes <- head(leading, 3)
+first_genes
 ```
