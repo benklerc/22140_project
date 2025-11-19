@@ -28,33 +28,30 @@ paste0(
 ### Meta data
 
 ```{r}
-file_path_08 <- "../data/Template_group6_GSE106608.csv"
+file_path_08 <- "../metadata_temporary/Template_group6_GSE106608.csv"
 
-metadata_df_08 <- read.table(
+metadata_df_08 <- read.csv(
   file_path_08,
-  sep = ",",          
-  header = TRUE,
   skip = 6,
   stringsAsFactors = FALSE
 )
-
 colnames(metadata_df_08)[5] <- "groups"
-
 head(metadata_df_08)
 ```
 
 ```{r}
-file_path_83 <- "../data/Template_group6_GSE106608.csv"
-
+file_path_83 <- "../metadata_temporary/Template_group6_GSE208783.csv"
 metadata_df_83 <- read.table(
   file_path_83,
   sep = ",",          
   header = TRUE,
   skip = 6,
-  stringsAsFactors = FALSE
+  stringsAsFactors = FALSE,
+  quote = "\""         # Add this line to handle quoted fields
 )
-
 colnames(metadata_df_83)[5] <- "groups"
+# Remove the "" from groups
+metadata_df_83$groups <- gsub("\"", "", metadata_df_83$groups)
 
 head(metadata_df_83)
 ```

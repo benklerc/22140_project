@@ -1,0 +1,23 @@
+Topic (1-2 words): Parkinson's disease,,,,
+Study description (1-2 sentences): Next Generation Sequencing facilitated analysis of gene expression differences in the subthalamic nucleus (STN) between Parkinson's and Normal post-mortem human brains,,,,
+Article link (if exisits): ,,,,
+"Baseline group (must match the ""Groups"" column): ""healthy""",,,,
+"Condition group (must match the ""Groups"" column): ""parkinson's""",,,,
+,,,,
+study_id,sample_id,title,characteristics,"Groups (manually annotated by you, e.g. ""healtht"", ""Tumor"" etc)"
+GSE106608,GSM2843848,H204,"disease state: control, tissue: Brain subthalamic nucleus, age: 66, Sex: M",healthy
+GSE106608,GSM2843849,H137,"disease state: control, tissue: Brain subthalamic nucleus, age: 77, Sex: F",healthy
+GSE106608,GSM2843850,H123,"disease state: control, tissue: Brain subthalamic nucleus, age: 78, Sex: M",healthy
+GSE106608,GSM2843851,H109,"disease state: control, tissue: Brain subthalamic nucleus, age: 81, Sex: M",healthy
+GSE106608,GSM2843852,H122,"disease state: control, tissue: Brain subthalamic nucleus, age: 72, Sex: F",healthy
+GSE106608,GSM2843853,H131,"disease state: control, tissue: Brain subthalamic nucleus, age: 73, Sex: M",healthy
+GSE106608,GSM2843854,H120,"disease state: control, tissue: Brain subthalamic nucleus, age: 62, Sex: M",healthy
+GSE106608,GSM2843855,H121,"disease state: control, tissue: Brain subthalamic nucleus, age: 64, Sex: F",healthy
+GSE106608,GSM2843856,H168,"disease state: control, tissue: Brain subthalamic nucleus, age: 63, Sex: M",healthy
+GSE106608,GSM2843857,PD50,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 88, Sex: M",parkinson's
+GSE106608,GSM2843858,PD54,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 78, Sex: M",parkinson's
+GSE106608,GSM2843859,PD16,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 79, Sex: M",parkinson's
+GSE106608,GSM2843860,PD33,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 91, Sex: M",parkinson's
+GSE106608,GSM2843861,PD15,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 76, Sex: M",parkinson's
+GSE106608,GSM2843862,PD8,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 55, Sex: F",parkinson's
+GSE106608,GSM2843863,PD58,"disease state: Parkinson's Disease, tissue: Brain subthalamic nucleus, age: 82, Sex: F",parkinson's
