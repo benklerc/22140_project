@@ -6,6 +6,10 @@ format: html
 # Setting up data
 
 ```{r}
+library(DEXSeq)
+library(fgsea)
+library(msigdbr)
+
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
 
 isoform_count_08 <-loadIsoformCountMatrix('GSE106608')
