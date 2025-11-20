@@ -20,7 +20,7 @@ gene_count_08 <- extractGeneCountMatrixFromIsoCounts(isoform_count_08)
 gene_count_77 <- extractGeneCountMatrixFromIsoCounts(isoform_count_77)
 
 isoform_count_08 <- as.data.frame(isoform_count_08)
-isoform_count_77 <- as.data.frame(isoform_count_83)
+isoform_count_77 <- as.data.frame(isoform_count_77)
 
 isoInfo <- read_rds(
 paste0(
@@ -101,6 +101,22 @@ head(metadata_df_77)
 
 ```{r}
 # Subset isoInfo to match the transcripts present in the count matrix
+# Function to filter rows where no sample exceeds threshold
+filter_low_expression <- function(count_matrix, threshold = 5) {
+  # Check if any sample in each row has a value > threshold
+  keep_rows <- apply(count_matrix, 1, function(row) any(row > threshold))
+  
+  # Return filtered matrix
+  return(count_matrix[keep_rows, ])
+}
+
+# Apply filtering to both datasets
+### !ATTENTIONE! we put the threshold mega high here, it shoud probably be close to 0, maybe 5. But we just do this before we figure out if we should run the entire thing, it takes a long time
+isoform_count_08 <- filter_low_expression(isoform_count_08, threshold = 1000)
+isoform_count_77 <- filter_low_expression(isoform_count_77, threshold = 1000)
+
+# Subset isoInfo to match the transcripts present in the count matrix
+## We should also do this subset info matching for count_77
 isoInfo_sub <- isoInfo[match(rownames(isoform_count_08), isoInfo$transcript_id), ]
 
 featureID <- isoInfo_sub$transcript_id
@@ -111,11 +127,14 @@ dxdSubset <- DEXSeqDataSet(
   countData = isoform_count_08,
   sampleData = metadata_df_08,
   # Final successful design formula
-  design = ~ sample + exon + groups:exon + gender:exon + age:exon,
+  design = ~ sample + exon + groups:exon + gender:exon,
   featureID = featureID,
   groupID = groupID
 )
 
+```
+
+```{r}
 # Estimate size factors for normalization
 dxdSubset <- estimateSizeFactors(dxdSubset)
 
@@ -125,7 +144,7 @@ dxdSubset <- estimateDispersions(dxdSubset)
 # Test for Differential Exon Usage (DEU)
 dxdSubset <- testForDEU(
   dxdSubset,
-  fullModel = ~ sample + exon + condition:exon + gender:exon + age:exon,
+  fullModel = ~ sample + exon + groups:exon + gender:exon,
   reducedModel = ~ sample + exon + gender:exon
 )
 
@@ -145,44 +164,16 @@ print(n_sig_genes)
 ```
 
 ```{r}
-dexseq_df <- as.data.frame(dexseqResult)
+# See the most significant genes
+dexseq_df <- as.data.frame(dxdResult)
 dexseq_df <- dexseq_df[order(dexseq_df$padj), ]
-top5_genes <- dexseq_df$groupID[!is.na(dexseq_df$padj)][1:10]
+top10_genes <- dexseq_df$groupID[!is.na(dexseq_df$padj)][1:10]
+top10_genes
 ```
 
 ```{r}
-# Save the complete DEXSeq results object
-saveRDS(dxdResult, file = "dexseq_results.rds")
+# Save the complete DEXSeq results object, so we can load them again
+saveRDS(dxdResult, file = "../data/dexseq_results.rds")
+saveRDS(dxdSubset, file = "../data/dexseq_dataset_object.rds")
 
-# Save significant isoforms as CSV
-write.csv(
-  sig_iso,
-  file = "significant_isoforms.csv",
-  row.names = TRUE
-)
-
-# Save ordered results data frame
-write.csv(
-  dexseq_df,
-  file = "dexseq_results_all.csv",
-  row.names = TRUE
-)
-
-# Save summary statistics as a text file
-summary_stats <- data.frame(
-  n_significant_isoforms = n_sig_isoforms,
-  n_significant_genes = n_sig_genes,
-  alpha_threshold = alpha,
-  total_isoforms_tested = nrow(dxdResult),
-  analysis_date = Sys.Date()
-)
-
-write.csv(
-  summary_stats,
-  file = "analysis_summary.csv",
-  row.names = FALSE
-)
-
-# Optional: Save the complete DEXSeq object for later use
-saveRDS(dxdSubset, file = "dexseq_dataset_object.rds")
 ```
