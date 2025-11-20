@@ -42,10 +42,6 @@ metadata_df_08 <- read.csv(
 )
 colnames(metadata_df_08)[5] <- "groups"
 
-metadata_df_08 <- metadata_df_08 |>
-  mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
-  )
-
 head(metadata_df_08)
 
 ```
@@ -66,6 +62,39 @@ colnames(metadata_df_77)[5] <- "groups"
 
 # Remove quotes from groups column
 metadata_df_77$groups <- gsub("\"", "", metadata_df_77$groups)
+
+head(metadata_df_77)
+```
+
+### Splitting characteristics into gender and age
+
+#### 08 datafile
+
+```{r}
+metadata_df_08 <- metadata_df_08 |>
+  mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
+  )
+
+metadata_df_08 <- metadata_df_08 |>
+  mutate(
+    age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
+  )
+
+head(metadata_df_08)
+```
+
+#### 77 datafile
+
+```{r}
+metadata_df_77 <- metadata_df_77 |>
+  mutate(
+    gender = str_extract(characteristics, "(?<=gender: )[^,]+")
+  )
+
+metadata_df_77 <- metadata_df_77 |>
+  mutate(
+    age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
+  )
 
 head(metadata_df_77)
 ```
