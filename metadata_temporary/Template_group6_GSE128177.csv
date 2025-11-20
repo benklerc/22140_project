@@ -1,0 +1,38 @@
+﻿Topic (1-2 words): Parkinson's disease;;;;
+Study description (1-2 sentences): Skeletal Muscle Transcriptional Networks Linked to Motor Unit Remodeling in Human Parkinson’s Disease;;;;
+Article link (if exisits):  PMID: 31829804;;;;
+"Baseline group (must match the ""Groups"" column): ""healthy""";;;;
+"Condition group (must match the ""Groups"" column): ""parkinson's""";;;;
+;;;;
+study_id;sample_id;title;characteristics;"Groups (manually annotated by you, e.g. ""healtht"", ""Tumor"" etc)"
+GSE128177;GSM3666154;M-M-01;tissue: Skeletal Muscle,age: 65,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666155;M-M-02;tissue: Skeletal Muscle,age: 65,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666156;M-M-03;tissue: Skeletal Muscle,age: 32,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666157;M-M-04;tissue: Skeletal Muscle,age: 66,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666158;M-M-06;tissue: Skeletal Muscle,age: 69,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666160;M-M-08;tissue: Skeletal Muscle,age: 67,gender: Female,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666161;M-M-10;tissue: Skeletal Muscle,age: 71,gender: Female,group: Old_adult;healthy
+GSE128177;GSM3666163;M-M-12;tissue: Skeletal Muscle,age: 71,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666164;M-M-14;tissue: Skeletal Muscle,age: 74,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666165;M-M-15;tissue: Skeletal Muscle,age: 30,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666166;M-M-16;tissue: Skeletal Muscle,age: 54,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666167;M-M-18;tissue: Skeletal Muscle,age: 50,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666168;M-M-19;tissue: Skeletal Muscle,age: 25,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666169;M-M-20;tissue: Skeletal Muscle,age: 76,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666170;M-M-22;tissue: Skeletal Muscle,age: 79,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666172;M-M-24;tissue: Skeletal Muscle,age: 66,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666173;M-M-25;tissue: Skeletal Muscle,age: 67,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666174;M-M-26;tissue: Skeletal Muscle,age: 35,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666177;M-M-29;tissue: Skeletal Muscle,age: 33,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666178;M-M-30;tissue: Skeletal Muscle,age: 60,gender: Female,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666179;M-M-31;tissue: Skeletal Muscle,age: 63,gender: Female,group: Old_adult;healthy
+GSE128177;GSM3666180;M-M-32;tissue: Skeletal Muscle,age: 30,gender: Female,group: Young_adult;healthy
+GSE128177;GSM3666181;M-M-33;tissue: Skeletal Muscle,age: 62,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666182;M-M-34;tissue: Skeletal Muscle,age: 58,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666183;M-M-35;tissue: Skeletal Muscle,age: 24,gender: Male,group: Young_adult;healthy
+GSE128177;GSM3666184;M-M-36;tissue: Skeletal Muscle,age: 75,gender: Female,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666185;M-M-37;tissue: Skeletal Muscle,age: 73,gender: Female,group: Old_adult;healthy
+GSE128177;GSM3666186;M-M-38;tissue: Skeletal Muscle,age: 37,gender: Female,group: Young_adult;healthy
+GSE128177;GSM3666187;M-M-39;tissue: Skeletal Muscle,age: 69,gender: Male,group: Parkinson_disease;parkinson's
+GSE128177;GSM3666188;M-M-40;tissue: Skeletal Muscle,age: 71,gender: Male,group: Old_adult;healthy
+GSE128177;GSM3666189;M-M-41;tissue: Skeletal Muscle,age: 23,gender: Male,group: Young_adult;healthy
