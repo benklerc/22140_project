@@ -1,0 +1,210 @@
+---
+title: "DESeq"
+format: html
+---
+
+### DESeq analysis
+
+#### Load environment and data
+
+```{r}
+library(tidyverse)
+library(DESeq2)
+library(fgsea)
+library(msigdbr)
+```
+
+##### Check that colnames in count data and row names of metadata are in the same order
+
+```{r}
+all(metadata_df_08$sample == colnames(gene_count_08))
+```
+
+```{r}
+dds_08 <- DESeqDataSetFromMatrix(
+  countData = gene_count_08, 
+  colData = metadata_df_08,
+  design = ~ groups)
+```
+
+#### PCA plot
+
+converting counts to integer mode
+
+```{r}
+dds_08
+```
+
+```{r}
+plotPCA(rlog(dds_08), intgroup=c("groups"))
+```
+
+PCA does not seem to capture healthy/parkinsons.
+
+#### Testing for differential expression
+
+```{r}
+dds_08 <- DESeq(dds_08)
+```
+
+```{r}
+res_08 <- results(dds_08)
+```
+
+How many genes were significant using an alpha of 0.05?
+
+```{r}
+n_sig_08 <- sum(res_08$padj < 0.05, na.rm = TRUE)
+n_sig_08
+```
+
+```{r}
+nrow(gene_count_08)
+```
+
+Out of 67,186 genes showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
+
+##### Correcting for confounders
+
+Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
+
+```{r}
+dds_gender_08 <- DESeqDataSetFromMatrix(
+  countData = gene_count_08,
+  colData = metadata_df_08,
+  design = ~ gender + groups)
+```
+
+```{r}
+dds_gender_08
+```
+
+```{r}
+plotPCA(rlog(dds_gender_08), intgroup=c("groups", "gender"))
+```
+
+PC1 does not explicitly seem to capture healthy vs. parkinson's condition.
+
+PC2 also does not seem to separate based on gender.
+
+Or vice versa.
+
+This indicates that gender effects may also contribute to the overall variance in gene expression
+
+###### Note: Perhaps check for age confounder? Discuss how to make age intervals (now it is continuous- perhaps based on litterature)
+
+##### Checking for co-factor
+
+```{r}
+dds_gender_08 <- DESeq(dds_gender_08)
+```
+
+A co-factor is *any variable that explains expression variation*, even if it is balanced between conditions and therefore not a confounder.
+
+```{r}
+res_gender_08 <- results(dds_gender_08,
+                         contrast =c(
+                          "groups",
+                          "healthy",
+                          "parkinson's")
+                         )
+```
+
+How many genes were significant using an alpha of 0.05?\
+
+```{r}
+n_sig_gender_08 <- sum(res_gender_08$padj < 0.05, na.rm = TRUE)
+n_sig_gender_08
+```
+
+What is the overlap between the differential analysis with and without modeling gender?\
+
+```{r}
+signif_08 <- rownames(res_08)[!is.na(res_08$padj) & res_08$padj < 0.05]
+signif_gender_08 <- rownames(res_gender_08)[!is.na(res_gender_08$padj) & res_gender_08$padj < 0.05]
+
+# Number of genes in common
+n_common_08 <- length(intersect(signif_08, signif_gender_08))
+n_common_08
+```
+
+Gender looks like a modest but real co-factor.
+
+Without gender in the model we get 518 DE genes; with gender we get 433, with 405 overlapping. That means gender doesn’t dominate the signal but it shifts a 30ish genes (a 6,5% reduction).
+
+Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
+
+#### Gene-set enrichment analysis
+
+##### FSC
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_08 <- res_gender_08[,"stat"]
+names(myStats_08) <- rownames(res_gender_08)
+
+# Remove the ensembl version in the names
+clean_names_08 <- sub("\\.\\d+$", "", names(myStats_08))
+names(myStats_08) <- clean_names_08
+
+myStats_08 <- myStats_08[!is.na(myStats_08)]
+myStats_08 <- sort(myStats_08, decreasing = TRUE)
+```
+
+```{r}
+fg_08 <- fgseaMultilevel(pathways = BP_list, stats = myStats_08, minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_08 <- fg_08 |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_08)
+```
+
+```{r}
+fg_sig_08[1:10]
+```
+
+Positive regulation increases expression
+
+Among the top 10 significant gene-set, there is a clear immune repose, T cell activation, Leukocyte proliferation theme.
+
+α-synuclein-specific T cells appear in PD; T cells infiltrate brain and promote neurodegeneration
+
+In the most significant pathway, discover three genes that are implicated in this significant DE.
+
+```{r}
+chosen_pathway_08 <- fg_sig_08$pathway[1]
+plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) +
+ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+```
+
+```{r}
+leading_08 <- fg_sig_08$leadingEdge[[1]]
+first_genes_08 <- head(leading_08, 3)
+first_genes_08
+```
+
+ENSG00000136235 (GPNMB):
+
+ENSG00000155659 (VSIG4): Phagocytic receptor, strong negative regulator of T-cell proliferation and IL2 production. 
+
+ENSG00000229295 (HLA-DPB1) : Important player in presenting antigen to APCs
+
+##### FSC as non-directional
+
+```{r}
+stats_abs_08 <- abs(myStats_08)
+fg_nondir_08 <- fgseaMultilevel(pathways = BP_list, stats = stats_abs_08,
+minSize = 15, maxSize = 500, scoreType = "pos")
+```
+
+```{r}
+fg_nondir_08 <- fg_nondir_08[order(fg_nondir_08$padj), ]
+fg_nondir_08[1:10]
+```
