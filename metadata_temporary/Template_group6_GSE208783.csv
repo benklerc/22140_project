@@ -1,13 +1,13 @@
 Topic (1-2 words): Parkinson's disease,,,,
 Study description (1-2 sentences): Cell cycle arrest of neural progenitors causes impaired dopaminergic neuronal differentiation in GBA associated Parkinson’s disease midbrain organoids,,,,
 Article link (if exisits): DOI: 10.1038/s41531-025-00914-3,,,,
-"Baseline group (must match the ""Groups"" column): ""healthy""",,,,
-"Condition group (must match the ""Groups"" column): ""parkinsons""",,,,
+"Baseline group (must match the ""Groups"" column): ""healthy"",,,,"
+"Condition group (must match the ""Groups"" column): ""parkinsons"",,,,"
 ,,,,
-study_id,sample_id,title,characteristics,"Groups (manually annotated by you, e.g. ""healtht"", ""Tumor"" etc)"
-study_id,GSM6372120,CTRL2_R1,"cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy","""healthy"""
-"GSE208783,GSE208784",GSM6372121,CTRL2_R2,"cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy","""healthy"""
-"GSE208783,GSE208784",GSM6372122,CTRL2_R3,"cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy","""healthy"""
-"GSE208783,GSE208784",GSM6372123,PD1_R1,"cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)","""parkinsons"""
-"GSE208783,GSE208784",GSM6372124,PD1_R2,"cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)","""parkinsons"""
-"GSE208783,GSE208784",GSM6372125,PD1_R3,"cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)","""parkinsons"""
+"study_id,sample_id,title,characteristics,""Groups (manually annotated by you, e.g. """"healtht"""", """"Tumor"""" etc)"""
+"GSE208783,GSE208784,GSM6372120,CTRL2_R1,""cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy"",""""""healthy"""""""
+"GSE208783,GSE208784,GSM6372121,CTRL2_R2,""cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy"",""""""healthy"""""""
+"GSE208783,GSE208784,GSM6372122,CTRL2_R3,""cell line: WT_39,cell type: Midbrain organoids,genotype: wt/wt,Sex: Female,age: 65,disease: Healthy"",""""""healthy"""""""
+"GSE208783,GSE208784,GSM6372123,PD1_R1,""cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)"",""""""parkinsons"""""""
+"GSE208783,GSE208784,GSM6372124,PD1_R2,""cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)"",""""""parkinsons"""""""
+"GSE208783,GSE208784,GSM6372125,PD1_R3,""cell line: GBA_309,cell type: Midbrain organoids,genotype: wt/ GBA-N370S,Sex: Male,age: 69,disease: Parkinson's disease (PD)"",""""""parkinsons"""""""
