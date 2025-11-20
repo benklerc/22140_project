@@ -9,6 +9,7 @@ format: html
 library(DEXSeq)
 library(fgsea)
 library(msigdbr)
+library(stringr)
 
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
 
@@ -40,7 +41,13 @@ metadata_df_08 <- read.csv(
   stringsAsFactors = FALSE
 )
 colnames(metadata_df_08)[5] <- "groups"
+
+metadata_df_08 <- metadata_df_08 |>
+  mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
+  )
+
 head(metadata_df_08)
+
 ```
 
 ```{r}
