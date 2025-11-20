@@ -1,0 +1,67 @@
+---
+title: "DESeq"
+format: html
+---
+
+### DESeq analysis
+
+#### Load environment and data
+
+```{r}
+library(tidyverse)
+library(DESeq2)
+library(fgsea)
+library(msigdbr)
+```
+
+##### Check that colnames in count data and row names of metadata are in the same order
+
+```{r}
+all(metadata_df_08$sample == colnames(gene_count_08))
+```
+
+```{r}
+dds_08 <- DESeqDataSetFromMatrix(
+  countData = gene_count_08, 
+  colData = metadata_df_08,
+  design = ~ groups)
+```
+
+#### PCA plot
+
+converting counts to integer mode
+
+```{r}
+dds_08
+```
+
+```{r}
+plotPCA(rlog(dds_08), intgroup=c("groups"))
+```
+
+#### Testing for differential expression
+
+```{r}
+dds_08 <- DESeq(dds_08)
+```
+
+```{r}
+res_08 <- results(dds_08)
+```
+
+How many genes were significant using an alpha of 0.05?
+
+```{r}
+n_sig_08 <- sum(res_08$padj < 0.05, na.rm = TRUE)
+n_sig_08
+```
+
+```{r}
+nrow(gene_count_08)
+```
+
+Out of 67,186 genes showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
+
+##### Correcting for confounders
+
+Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
