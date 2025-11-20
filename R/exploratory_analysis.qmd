@@ -60,6 +60,9 @@ metadata_df_83 <- read.table(
   stringsAsFactors = FALSE,
   quote = "\""         # Add this line to handle quoted fields
 )
+
+head(metadata_df_83)
+
 colnames(metadata_df_83)[5] <- "groups"
 # Remove the "" from groups
 metadata_df_83$groups <- gsub("\"", "", metadata_df_83$groups)
