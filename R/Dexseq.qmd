@@ -14,7 +14,7 @@ library(stringr)
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
 
 isoform_count_08 <-loadIsoformCountMatrix('GSE106608')
-isoform_count_77 <-loadIsoformCountMatrix('GSE208783,GSE208784')
+isoform_count_77 <-loadIsoformCountMatrix('GSE128177')
 
 gene_count_08 <- extractGeneCountMatrixFromIsoCounts(isoform_count_08)
 gene_count_77 <- extractGeneCountMatrixFromIsoCounts(isoform_count_77)
@@ -112,20 +112,20 @@ filter_low_expression <- function(count_matrix, threshold = 5) {
 
 # Apply filtering to both datasets
 ### !ATTENTIONE! we put the threshold mega high here, it shoud probably be close to 0, maybe 5. But we just do this before we figure out if we should run the entire thing, it takes a long time
-isoform_count_08 <- filter_low_expression(isoform_count_08, threshold = 1000)
-isoform_count_77 <- filter_low_expression(isoform_count_77, threshold = 1000)
+isoform_count_08 <- filter_low_expression(isoform_count_08, threshold = 5)
+isoform_count_77 <- filter_low_expression(isoform_count_77, threshold = 5)
 
 # Subset isoInfo to match the transcripts present in the count matrix
 ## We should also do this subset info matching for count_77
-isoInfo_sub <- isoInfo[match(rownames(isoform_count_08), isoInfo$transcript_id), ]
+isoInfo_sub <- isoInfo[match(rownames(isoform_count_77), isoInfo$transcript_id), ]
 
 featureID <- isoInfo_sub$transcript_id
 groupID <- isoInfo_sub$gene_id
 
 # Build DEXSeq object
 dxdSubset <- DEXSeqDataSet(
-  countData = isoform_count_08,
-  sampleData = metadata_df_08,
+  countData = isoform_count_77,
+  sampleData = metadata_df_77,
   # Final successful design formula
   design = ~ sample + exon + groups:exon + gender:exon,
   featureID = featureID,
@@ -173,7 +173,7 @@ top10_genes
 
 ```{r}
 # Save the complete DEXSeq results object, so we can load them again
-saveRDS(dxdResult, file = "../data/dexseq_results.rds")
-saveRDS(dxdSubset, file = "../data/dexseq_dataset_object.rds")
+saveRDS(dxdResult, file = "../data/dexseq_results_77_full.rds")
+saveRDS(dxdSubset, file = "../data/dexseq_dataset_object_77_full.rds")
 
 ```
