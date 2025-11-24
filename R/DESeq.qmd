@@ -64,7 +64,7 @@ nrow(gene_count_08)
 
 Out of 67,186 genes showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
 
-##### Correcting for confounders
+##### Correcting for gender confounder
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
 
@@ -91,9 +91,7 @@ Or vice versa.
 
 This indicates that gender effects may also contribute to the overall variance in gene expression
 
-###### Note: Perhaps check for age confounder? Discuss how to make age intervals (now it is continuous- perhaps based on litterature)
-
-##### Checking for co-factor
+###### Co-factor
 
 ```{r}
 dds_gender_08 <- DESeq(dds_gender_08)
@@ -133,6 +131,46 @@ Gender looks like a modest but real co-factor.
 Without gender in the model we get 518 DE genes; with gender we get 433, with 405 overlapping. That means gender doesn’t dominate the signal but it shifts a 30ish genes (a 6,5% reduction).
 
 Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
+
+##### Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
+
+```{r}
+dds_gender_age_08 <- DESeqDataSetFromMatrix(
+  countData = gene_count_08,
+  colData = metadata_df_08,
+  design = ~  groups + age + gender)
+```
+
+```{r}
+dds_gender_age_08
+```
+
+```{r}
+#plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age"))
+```
+
+```{r}
+res_gender_age_08 <- results(dds_gender_08,
+                         contrast =c(
+                          "groups",
+                          "healthy",
+                          "parkinson's")
+                         )
+
+# How many genes were significant using an alpha of 0.05?
+n_sig_gender_age_08 <- sum(res_gender_age_08$padj < 0.05, na.rm = TRUE)
+cat("number of significant genes when modelling with gender:", n_sig_gender_age_08, "\n")
+
+# What is the overlap between the differential analysis with and without modeling age?
+signif_gender_08 <- rownames(res_08)[!is.na(res_gender_08$padj) & res_gender_08$padj < 0.05]
+signif_gender_age_08 <- rownames(res_gender_age_08)[!is.na(res_gender_age_08$padj) & res_gender_age_08$padj < 0.05]
+
+# Number of genes in common
+n_common_08 <- length(intersect(signif_gender_08, signif_gender_age_08))
+cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_08)
+```
+
+Conclusion: age is not a confounder!
 
 #### Gene-set enrichment analysis
 
