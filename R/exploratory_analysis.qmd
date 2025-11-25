@@ -21,13 +21,6 @@ gene_count_77 <- extractGeneCountMatrixFromIsoCounts(isoform_count_77)
 
 isoform_count_08 <- as.data.frame(isoform_count_08)
 isoform_count_77 <- as.data.frame(isoform_count_83)
-
-isoInfo <- read_rds(
-paste0(
-'/home/projects/22140/exam_data/',
-'Homo_sapiens.GRCh38.107.chr_patch_hapl_scaff_tx_info.Rds'
-)
-)
 ```
 
 ### Meta data
@@ -40,12 +33,7 @@ metadata_df_08 <- read.csv(
   skip = 6,
   stringsAsFactors = FALSE
 )
-colnames(meta_08)[5] <- "condition"
-
-head(meta_08)
-```
-
-```{r}
+colnames(metadata_df_08)[5] <- "groups"
 
 metadata_df_08 <- metadata_df_08 |>
   mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
@@ -73,5 +61,4 @@ colnames(metadata_df_77)[5] <- "groups"
 metadata_df_77$groups <- gsub("\"", "", metadata_df_77$groups)
 
 head(metadata_df_77)
-
 ```
