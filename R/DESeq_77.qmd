@@ -135,6 +135,12 @@ dds_gender_age_77 <- DESeqDataSetFromMatrix(
 dds_gender_age_77
 ```
 
+Save the object
+
+```{r}
+saveRDS(dds_gender_age_77, file = "../data/deseq2_object_77.rds")
+```
+
 ```{r}
 #plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age"))
 ```
@@ -158,6 +164,12 @@ signif_gender_age_77 <- rownames(res_gender_age_77)[!is.na(res_gender_age_77$pad
 # Number of genes in common
 n_common_77 <- length(intersect(signif_gender_77, signif_gender_age_77))
 cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_77)
+```
+
+Save the results
+
+```{r}
+saveRDS(res_gender_age_77, file = "../data/deseq2_results_77.rds")
 ```
 
 Conclusion: age is not a confounder!

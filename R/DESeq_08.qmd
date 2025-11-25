@@ -170,6 +170,13 @@ n_common_08 <- length(intersect(signif_gender_08, signif_gender_age_08))
 cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_08)
 ```
 
+Save object and results
+
+```{r}
+saveRDS(dds_gender_age_08, file = "../data/deseq2_results_08.rds")
+saveRDS(res_gender_age_08, file = "../data/deseq2_object_08.rds")
+```
+
 Conclusion: age is not a confounder!
 
 #### Gene-set enrichment analysis
