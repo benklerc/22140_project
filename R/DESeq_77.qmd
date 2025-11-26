@@ -132,7 +132,8 @@ dds_gender_age_77 <- DESeqDataSetFromMatrix(
 ```
 
 ```{r}
-dds_gender_age_77
+dds_gender_age_77 <- DESeq(dds_gender_age_77)
+
 ```
 
 Save the object
@@ -146,7 +147,7 @@ saveRDS(dds_gender_age_77, file = "../data/deseq2_object_77.rds")
 ```
 
 ```{r}
-res_gender_age_77 <- results(dds_gender_77,
+res_gender_age_77 <- results(dds_gender_age_77,
                          contrast =c(
                           "groups",
                           "healthy",
