@@ -143,14 +143,15 @@ dds_gender_age_08 <- DESeqDataSetFromMatrix(
 
 ```{r}
 dds_gender_age_08
+dds_gender_age_08 <- DESeq(dds_gender_age_08)
 ```
 
 ```{r}
-#plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age"))
+plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age", "gender"))
 ```
 
 ```{r}
-res_gender_age_08 <- results(dds_gender_08,
+res_gender_age_08 <- results(dds_gender_age_08,
                          contrast =c(
                           "groups",
                           "healthy",
@@ -159,7 +160,7 @@ res_gender_age_08 <- results(dds_gender_08,
 
 # How many genes were significant using an alpha of 0.05?
 n_sig_gender_age_08 <- sum(res_gender_age_08$padj < 0.05, na.rm = TRUE)
-cat("number of significant genes when modelling with gender:", n_sig_gender_age_08, "\n")
+cat("number of significant genes when modelling with gender and age:", n_sig_gender_age_08, "\n")
 
 # What is the overlap between the differential analysis with and without modeling age?
 signif_gender_08 <- rownames(res_08)[!is.na(res_gender_08$padj) & res_gender_08$padj < 0.05]
@@ -170,6 +171,23 @@ n_common_08 <- length(intersect(signif_gender_08, signif_gender_age_08))
 cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_08)
 ```
 
+Common significant genes between 1st run(groups) and 3rd run(groups, gender, age)
+
+```{r}
+n_sig_gender_age_08 <- sum(res_gender_age_08$padj < 0.05, na.rm = TRUE)
+cat("number of significant genes when modelling with gender and age:", n_sig_gender_age_08, "\n")
+
+cat("number of significant genes when modelling on condition:", n_sig_08, "\n")
+
+# What is the overlap between the differential analysis with and without modeling age?
+signif_08 <- rownames(res_08)[!is.na(res_08$padj) & res_08$padj < 0.05]
+signif_gender_age_08 <- rownames(res_gender_age_08)[!is.na(res_gender_age_08$padj) & res_gender_age_08$padj < 0.05]
+
+# Number of genes in common
+n_common_08 <- length(intersect(signif_08, signif_gender_age_08))
+cat("number of overlapping significant genes when modelling with gender and age, and just condition: ",n_common_08)
+```
+
 Save object and results
 
 ```{r}
@@ -177,7 +195,7 @@ saveRDS(dds_gender_age_08, file = "../data/deseq2_results_08.rds")
 saveRDS(res_gender_age_08, file = "../data/deseq2_object_08.rds")
 ```
 
-Conclusion: age is not a confounder!
+Conclusion: age is not a confounder! (actually only introduces more bias?)
 
 #### Gene-set enrichment analysis
 
