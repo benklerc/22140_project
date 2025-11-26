@@ -20,7 +20,18 @@ gene_count_08 <- extractGeneCountMatrixFromIsoCounts(isoform_count_08)
 gene_count_77 <- extractGeneCountMatrixFromIsoCounts(isoform_count_77)
 
 isoform_count_08 <- as.data.frame(isoform_count_08)
+<<<<<<< HEAD
 isoform_count_77 <- as.data.frame(isoform_count_83)
+=======
+isoform_count_77 <- as.data.frame(isoform_count_77)
+
+isoInfo <- read_rds(
+paste0(
+'/home/projects/22140/exam_data/',
+'Homo_sapiens.GRCh38.107.chr_patch_hapl_scaff_tx_info.Rds'
+)
+)
+>>>>>>> main
 ```
 
 ### Meta data
