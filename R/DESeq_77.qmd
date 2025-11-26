@@ -1,0 +1,242 @@
+---
+title: "DESeq"
+format: html
+---
+
+### DESeq analysis
+
+#### Load environment and data
+
+```{r}
+library(tidyverse)
+library(DESeq2)
+library(fgsea)
+library(msigdbr)
+```
+
+##### Check that colnames in count data and row names of metadata are in the same order
+
+```{r}
+all(metadata_df_77$sample == colnames(gene_count_77))
+```
+
+```{r}
+dds_77 <- DESeqDataSetFromMatrix(
+  countData = gene_count_77, 
+  colData = metadata_df_77,
+  design = ~ groups)
+```
+
+#### PCA plot
+
+converting counts to integer mode
+
+```{r}
+dds_77
+```
+
+```{r}
+plotPCA(rlog(dds_77), intgroup=c("groups"))
+```
+
+COMMENT ON THIS
+
+#### Testing for differential expression
+
+```{r}
+dds_77 <- DESeq(dds_77)
+```
+
+```{r}
+res_77 <- results(dds_77)
+```
+
+How many genes were significant using an alpha of 0.05?
+
+```{r}
+n_sig_77 <- sum(res_77$padj < 0.05, na.rm = TRUE)
+n_sig_77
+```
+
+```{r}
+nrow(gene_count_77)
+```
+
+COMMENT ON THIS
+
+##### Correcting for gender confounder
+
+Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
+
+```{r}
+dds_gender_77 <- DESeqDataSetFromMatrix(
+  countData = gene_count_77,
+  colData = metadata_df_77,
+  design = ~ gender + groups)
+```
+
+```{r}
+dds_gender_77
+```
+
+```{r}
+plotPCA(rlog(dds_gender_77), intgroup=c("groups", "gender"))
+```
+
+COMMENT ON THIS
+
+###### Co-factor
+
+```{r}
+dds_gender_77 <- DESeq(dds_gender_77)
+```
+
+A co-factor is *any variable that explains expression variation*, even if it is balanced between conditions and therefore not a confounder.
+
+```{r}
+res_gender_77 <- results(dds_gender_77,
+                         contrast =c(
+                          "groups",
+                          "healthy",
+                          "parkinson's")
+                         )
+```
+
+How many genes were significant using an alpha of 0.05?\
+
+```{r}
+n_sig_gender_77 <- sum(res_gender_77$padj < 0.05, na.rm = TRUE)
+n_sig_gender_77
+```
+
+What is the overlap between the differential analysis with and without modeling gender?\
+
+```{r}
+signif_77 <- rownames(res_77)[!is.na(res_77$padj) & res_77$padj < 0.05]
+signif_gender_77 <- rownames(res_gender_77)[!is.na(res_gender_77$padj) & res_gender_77$padj < 0.05]
+
+# Number of genes in common
+n_common_77 <- length(intersect(signif_77, signif_gender_77))
+n_common_77
+```
+
+COMMENT ON THIS
+
+##### Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
+
+```{r}
+dds_gender_age_77 <- DESeqDataSetFromMatrix(
+  countData = gene_count_77,
+  colData = metadata_df_77,
+  design = ~  groups + age + gender)
+```
+
+```{r}
+dds_gender_age_77
+```
+
+Save the object
+
+```{r}
+saveRDS(dds_gender_age_77, file = "../data/deseq2_object_77.rds")
+```
+
+```{r}
+#plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age"))
+```
+
+```{r}
+res_gender_age_77 <- results(dds_gender_77,
+                         contrast =c(
+                          "groups",
+                          "healthy",
+                          "parkinson's")
+                         )
+
+# How many genes were significant using an alpha of 0.05?
+n_sig_gender_age_77 <- sum(res_gender_age_77$padj < 0.05, na.rm = TRUE)
+cat("number of significant genes when modelling with gender:", n_sig_gender_age_77, "\n")
+
+# What is the overlap between the differential analysis with and without modeling age?
+signif_gender_77 <- rownames(res_77)[!is.na(res_gender_77$padj) & res_gender_77$padj < 0.05]
+signif_gender_age_77 <- rownames(res_gender_age_77)[!is.na(res_gender_age_77$padj) & res_gender_age_77$padj < 0.05]
+
+# Number of genes in common
+n_common_77 <- length(intersect(signif_gender_77, signif_gender_age_77))
+cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_77)
+```
+
+Save the results
+
+```{r}
+saveRDS(res_gender_age_77, file = "../data/deseq2_results_77.rds")
+```
+
+Conclusion: age is not a confounder!
+
+#### Gene-set enrichment analysis
+
+##### FSC
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_77 <- res_gender_77[,"stat"]
+names(myStats_77) <- rownames(res_gender_77)
+
+# Remove the ensembl version in the names
+clean_names_77 <- sub("\\.\\d+$", "", names(myStats_77))
+names(myStats_77) <- clean_names_77
+
+myStats_77 <- myStats_77[!is.na(myStats_77)]
+myStats_77 <- sort(myStats_77, decreasing = TRUE)
+```
+
+```{r}
+fg_77 <- fgseaMultilevel(pathways = BP_list, stats = myStats_77, minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_77 <- fg_77 |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_77)
+```
+
+```{r}
+fg_sig_77[1:10]
+```
+
+COMMENT ON THIS
+
+```{r}
+chosen_pathway_77 <- fg_sig_77$pathway[1]
+plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +
+ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+```
+
+```{r}
+leading_77 <- fg_sig_77$leadingEdge[[1]]
+first_genes_77 <- head(leading_77, 3)
+first_genes_77
+```
+
+COMMENT ON THIS
+
+##### FSC as non-directional
+
+```{r}
+stats_abs_77 <- abs(myStats_77)
+fg_nondir_77 <- fgseaMultilevel(pathways = BP_list, stats = stats_abs_77,
+minSize = 15, maxSize = 500, scoreType = "pos")
+```
+
+```{r}
+fg_nondir_77 <- fg_nondir_77[order(fg_nondir_77$padj), ]
+fg_nondir_77[1:10]
+```
+
+COMMENT ON THIS

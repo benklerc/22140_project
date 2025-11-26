@@ -14,7 +14,7 @@ library(stringr)
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
 
 isoform_count_08 <-loadIsoformCountMatrix('GSE106608')
-isoform_count_77 <-loadIsoformCountMatrix('GSE208783,GSE208784')
+isoform_count_77 <-loadIsoformCountMatrix('GSE128177')
 
 gene_count_08 <- extractGeneCountMatrixFromIsoCounts(isoform_count_08)
 gene_count_77 <- extractGeneCountMatrixFromIsoCounts(isoform_count_77)
@@ -34,10 +34,6 @@ metadata_df_08 <- read.csv(
   stringsAsFactors = FALSE
 )
 colnames(metadata_df_08)[5] <- "groups"
-
-metadata_df_08 <- metadata_df_08 |>
-  mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
-  )
 
 head(metadata_df_08)
 
@@ -59,6 +55,39 @@ colnames(metadata_df_77)[5] <- "groups"
 
 # Remove quotes from groups column
 metadata_df_77$groups <- gsub("\"", "", metadata_df_77$groups)
+
+metadata_df_77
+```
+
+### Splitting characteristics into gender and age
+
+#### 08 datafile
+
+```{r}
+metadata_df_08 <- metadata_df_08 |>
+  mutate(gender = str_extract(characteristics, "(?<=Sex: )\\w$")
+  )
+
+metadata_df_08 <- metadata_df_08 |>
+  mutate(
+    age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
+  )
+
+head(metadata_df_08)
+```
+
+#### 77 datafile
+
+```{r}
+metadata_df_77 <- metadata_df_77 |>
+  mutate(
+    gender = str_extract(characteristics, "(?<=gender: )[^,]+")
+  )
+
+metadata_df_77 <- metadata_df_77 |>
+  mutate(
+    age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
+  )
 
 head(metadata_df_77)
 ```
