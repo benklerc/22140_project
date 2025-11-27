@@ -102,8 +102,8 @@ head(metadata_df_77)
 # Load Result files
 
 ```{r}
-res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
-#res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
+#res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
+res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
 res_gender_77 <- readRDS('../data/deseq2_results_77.rds')
 #res_gender_77 <- readRDS('../data/deseq2_object_77.rds')
 dxdResult_08 <- readRDS('../data/dexseq_results_08.rds')
