@@ -250,7 +250,7 @@ nrow(fg_sig_08)
 ```
 
 ```{r}
-fg_sig_08[1:10]
+fg_sig_08[1:100]
 ```
 
 Positive regulation increases expression

@@ -106,8 +106,8 @@ head(metadata_df_77)
 # Load Result files
 
 ```{r}
-res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
-#res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
+#res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
+res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
 res_gender_77 <- readRDS('../data/deseq2_results_77.rds')
 #res_gender_77 <- readRDS('../data/deseq2_object_77.rds')
 dxdResult_08 <- readRDS('../data/dexseq_results_08.rds')
@@ -146,7 +146,13 @@ df_deseq_77_age <- as.data.frame(res_gender_77)
 
     -   look at biology, choose focus
 
+    -   non-directional, if pathways have genes that are downerglated and upregulated these are scored significantly now
+
 -   What is leading Edge in the FGSEA analysis?
+
+    -   gene list from max ES value to start
+
+    -   list of genes which contributes most
 
 -   Why do we have so few significant isoform and genes in the 77 datatset
 
@@ -170,7 +176,7 @@ df_deseq_77_age <- as.data.frame(res_gender_77)
 
 # TODOs
 
--   Find out the meaning of contrast in the Result pulliing of DeSeq2(Interpretation of Age as cofounder)
+-   Find out the meaning of contrast in the Result pulling of DeSeq2(Interpretation of Age as cofounder)
 
     -   try out only age+condition
 
@@ -178,11 +184,17 @@ df_deseq_77_age <- as.data.frame(res_gender_77)
 
     -   do analysis inlcuding age
 
--   Numberof genes in isoforms == number of genes in genecount
+-   Numberof genes in isoforms == number of genes in genecount(Cora)
 
 -   Basic research on Parkinson(Sander)
 
--   Maltes results for dexseq dataset 77
+-   GSEA on DEXSeq(Malte)
+
+-   DEXSeq with condition+gender+age(Malte)
+
+-   DeSeq2 with condition, gender, age and all following analysis(Cecilie)
+
+-   Comparisons of DeSeq2 and DEXSeq(week6, Sander)
 
 -   77: remove young healthy adults, rerun DEXSeq(if more significant also need to rerun all other analysis)(Cecilie)
 
@@ -192,7 +204,15 @@ df_deseq_77_age <- as.data.frame(res_gender_77)
 
     -   introduction(Background-Sander, Data-Cora)
 
--   
+-   p-value integration in 2 steps(Cora)
+
+    -   GSEA
+
+-   Virtual Pulldown(Malte?/whoever has time, please write in group if you start with this)
+
+    -   cluster
+
+    -   assign biological function
 
 ```{r}
 isoform_count_08 %>% group_by()
