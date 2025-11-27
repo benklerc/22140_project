@@ -38,7 +38,8 @@ dds_08
 ```
 
 ```{r}
-plotPCA(rlog(dds_08), intgroup=c("groups"))
+pca_08 <- plotPCA(rlog(dds_08), intgroup=c("groups"))
+pca_08
 ```
 
 PCA does not seem to capture healthy/parkinsons. There seem to be other factors which influence the gene expression other than the condition
@@ -84,7 +85,8 @@ dds_gender_08
 ```
 
 ```{r}
-plotPCA(rlog(dds_gender_08), intgroup=c("groups", "gender"))
+pca_08_gender <- plotPCA(rlog(dds_gender_08), intgroup=c("groups", "gender"))
+pca_08_gender
 ```
 
 PC1 does not explicitly seem to capture healthy vs. parkinson's condition.
@@ -94,6 +96,10 @@ PC2 also does not seem to separate based on gender.
 Or vice versa.
 
 This indicates that gender effects may also contribute to the overall variance in gene expression
+
+```{r}
+ggsave("../fig/pca_08_gender.png", plot = pca_08_gender)
+```
 
 ###### Co-factor
 
@@ -153,7 +159,12 @@ dds_gender_age_08 <- DESeq(dds_gender_age_08)
 ```
 
 ```{r}
-plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age", "gender"))
+pca_gender_age_08 <- plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age", "gender"))
+pca_gender_age_08
+```
+
+```{r}
+ggsave("../fig/pca_gender_age_08.png", plot = pca_gender_age_08)
 ```
 
 ```{r}
@@ -264,7 +275,12 @@ In the most significant pathway, discover three genes that are implicated in thi
 ```{r}
 chosen_pathway_08 <- fg_sig_08$pathway[1]
 plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) +
-ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct
+```
+
+```{r}
+ggsave("../fig/enrichment_08_direct.png", plot = enrichment_08_direct)
 ```
 
 ```{r}

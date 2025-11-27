@@ -85,7 +85,14 @@ dds_gender_77
 ```
 
 ```{r}
-plotPCA(rlog(dds_gender_77), intgroup=c("groups", "gender"))
+pca_77_gender <- plotPCA(rlog(dds_gender_77), intgroup=c("groups", "gender"))
+pca_77_gender
+```
+
+Save plot
+
+```{r}
+ggsave("../fig/pca_77_gender.png", plot = pca_77_gender)
 ```
 
 COMMENT ON THIS
@@ -148,7 +155,14 @@ saveRDS(dds_gender_age_77, file = "../data/deseq2_object_77.rds")
 ```
 
 ```{r}
-#plotPCA(rlog(dds_gender_age_08), intgroup=c("groups","age"))
+pca_gender_age_77 <- plotPCA(rlog(dds_gender_age_77), intgroup=c("groups","age"))
+pca_gender_age_77
+```
+
+Save the plot
+
+```{r}
+ggsave("../fig/pca_gender_age_77.png", plot = pca_gender_age_77)
 ```
 
 ```{r}
@@ -222,7 +236,12 @@ COMMENT ON THIS
 ```{r}
 chosen_pathway_77 <- fg_sig_77$pathway[1]
 plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +
-ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct
+```
+
+```{r}
+ggsave("../fig/enrichment_77_direct.png", plot = enrichment_77_direct)
 ```
 
 ```{r}
