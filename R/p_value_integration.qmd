@@ -1,0 +1,113 @@
+---
+title: "p_value_integration"
+format: html
+---
+
+# Load libraries
+
+```{r}
+library(tidyverse)
+library(fgsea)
+library(msigdbr)
+```
+
+```{r}
+set.seed(42)
+```
+
+# Data wrangling
+
+Joined(inner) dataset with p values from both datsets(08, 77) and both analysis(DeSeq2, DEXSeq)
+
+```{r}
+diff_gene_expr_08 <- as.data.frame(res_gender_08) %>% 
+  select(pvalue) %>% 
+  rownames_to_column(var = 'Genes') %>% 
+  rename(deseq_08_pval = pvalue )
+diff_gene_expr_77 <- as.data.frame(res_gender_77) %>% 
+  select(pvalue) %>% 
+  rownames_to_column(var = 'Genes') %>% 
+  rename(deseq_77_pval = pvalue)
+diff_transcript_expr_08 <- as.data.frame(dxdResult) %>% 
+  select(groupID, pvalue) %>% 
+  rename(
+    Genes = groupID
+  ) %>% 
+  group_by(Genes) %>% 
+  summarise(dexseq_08_pval = min(pvalue))
+diff_transcript_expr_77 <- as.data.frame(dxdResult_77) %>% 
+  select(groupID, pvalue) %>% 
+  rename(
+    Genes = groupID
+  ) %>% 
+  group_by(Genes) %>% 
+  summarise(dexseq_77_pval = min(pvalue))
+
+dim(diff_gene_expr_08)
+dim(diff_transcript_expr_08)
+dim(diff_transcript_expr_77)
+```
+
+```{r}
+load(file='/home/projects/22140/exercise7_data.Rdata')
+nrow(jointDiffRes)
+length(unique(jointDiffRes$gene_id))
+```
+
+```{r}
+full_diff_analysis <- diff_gene_expr_08 %>% 
+  inner_join(diff_gene_expr_77, by = 'Genes') %>% 
+  inner_join(diff_transcript_expr_08, by = 'Genes') %>% 
+  inner_join(diff_transcript_expr_77, by = 'Genes') %>% 
+  na.omit()
+full_diff_analysis
+```
+
+# Fishers Method
+
+```{r}
+pval_cols <- c(colnames(full_diff_analysis),-c('Genes'))
+full_diff_analysis <- full_diff_analysis |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher = metap::sumlog(c(deseq_08_pval, deseq_77_pval, dexseq_08_pval, dexseq_77_pval))$p  ) |>
+  ungroup()
+```
+
+# Multiple Testing adjustment
+
+```{r}
+full_diff_analysis <- full_diff_analysis %>% 
+  mutate(
+  padj_deseq_08 = p.adjust(deseq_08_pval, method = "BH"),
+  padj_deseq_77 = p.adjust(deseq_77_pval, method = "BH"),
+  padj_dexseq_08 = p.adjust(dexseq_08_pval, method = "BH"),
+  padj_dexseq_77 = p.adjust(dexseq_77_pval, method = "BH"),
+  padj_joint = p.adjust(joint_pval_fisher, method = "BH"),
+  sig_deseq_08 = padj_deseq_08 < 0.05,
+  sig_deseq_77 = padj_deseq_77 < 0.05,
+  sig_dexseq_08 = padj_dexseq_08 < 0.05,
+  sig_dexseq_77 = padj_dexseq_77 < 0.05,
+  sig_joint = padj_joint < 0.05
+  )
+```
+
+```{r}
+sig_counts <- c(
+DESeq_08 = sum(full_diff_analysis$sig_deseq_08),
+DESeq_77 = sum(full_diff_analysis$sig_deseq_77),
+DEXSeq_08 = sum(full_diff_analysis$sig_dexseq_08),
+DEXSeq_77 = sum(full_diff_analysis$sig_dexseq_77),
+Joint = sum(full_diff_analysis$sig_joint)
+)
+sig_counts
+```
+
+uniquely significant in joint
+
+```{r}
+unique_joint <- sum(full_diff_analysis$sig_joint &
+!full_diff_analysis$sig_deseq_08 & !full_diff_analysis$sig_deseq_77 & !full_diff_analysis$sig_dexseq_08 & !full_diff_analysis$sig_dexseq_77)
+unique_joint
+
+```
