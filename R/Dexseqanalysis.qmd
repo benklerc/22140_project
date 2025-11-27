@@ -15,3 +15,47 @@ dxdResult_08_df <- dxdResult_08_df[order(dxdResult_08_df$padj),]
 dxdResult_77_df <- dxdResult_77_df[order(dxdResult_77_df$padj),]
 
 ```
+
+```{r}
+#making the deseq into dataframes
+deseq_08_df <- as.data.frame(res_gender_age_08)
+deseq_77_df <- as.data.frame(res_gender_77)
+```
+
+## comparing to differential expression:
+
+#### function that turns Dexseq into gene counts
+
+```{r}
+dexseq_to_genelevel <- function(x) {
+  x %>%
+    as.data.frame() %>%
+    as_tibble() %>%
+    # Remove rows with NULL or NA 'stat'
+    filter(!is.na(stat)) %>%
+    # Select & rename columns
+    dplyr::select(
+      gene_id   = groupID,
+      isoform_id = featureID,
+      stat,
+      log2FC = log2fold_Primary_Tumor_Solid_Tissue_Normal,
+      pvalue,
+      padj
+    ) %>%
+    # Group isoforms by gene
+    group_by(gene_id) %>%
+    # Keep isoform with smallest p-value
+    slice_min(order_by = pvalue, n = 1, with_ties = FALSE) %>%
+    ungroup() %>%
+    # Recalculate gene-level FDR
+    mutate(
+      padj = p.adjust(pvalue, method = "fdr")
+    )
+}
+```
+
+### 08 analysis
+
+```{r}
+dex_gene_08 <- dexseq_to_genelevel(dxdResult_08)
+```
