@@ -3,7 +3,7 @@ title: "DESeq"
 format: html
 ---
 
-### DESeq analysis
+### 
 
 #### Load environment and data
 
@@ -19,6 +19,8 @@ library(msigdbr)
 ```{r}
 all(metadata_df_08$sample == colnames(gene_count_08))
 ```
+
+### DESeq Condition
 
 ```{r}
 dds_08 <- DESeqDataSetFromMatrix(
@@ -67,6 +69,8 @@ Out of 67,186 genes showed significant differential expression between the two g
 ##### Correcting for gender confounder
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
+
+### DESeq Condition&Gender
 
 ```{r}
 dds_gender_08 <- DESeqDataSetFromMatrix(
@@ -132,6 +136,8 @@ Without gender in the model we get 518 DE genes; with gender we get 433, with 40
 
 Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
 
+### DESeq Condition&Gender&Age
+
 ##### Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
 
 ```{r}
@@ -192,7 +198,16 @@ Age has a big influence on gene expression, but is not necessarily correlated wi
 
 Conclusion: age is not a confounder!
 
-Save object and results
+### DESeq Condition&Age
+
+```{r}
+dds_gender_08 <- DESeqDataSetFromMatrix(
+  countData = gene_count_08,
+  colData = metadata_df_08,
+  design = ~ gender + age)
+```
+
+## Save object and results
 
 ```{r}
 saveRDS(dds_gender_08, file = "../data/deseq2_object_08.rds")
@@ -215,7 +230,7 @@ BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
 # Create the ranked list of gene-level statistics
 myStats_08 <- res_gender_08[,"stat"]
 names(myStats_08) <- rownames(res_gender_08)
-
+`
 # Remove the ensembl version in the names
 clean_names_08 <- sub("\\.\\d+$", "", names(myStats_08))
 names(myStats_08) <- clean_names_08

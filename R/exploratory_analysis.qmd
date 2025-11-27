@@ -126,29 +126,55 @@ df_deseq_77_age <- as.data.frame(res_gender_77)
 
 # Questions
 
--   Numberof genes in isoforms == number of genes in genecount
-
 -   Combine all 4 dataset, combine them all at once or pariwise and then 08 and 77 together
+
+    -   first do gene count and isoform count for one dataset(fishers)
+
+    -   and then integrate both datasets(edigtons)
+
+    -   order could also be turned around(slightly different result, but not extreme)
 
 -   significance of contrast in DeSeq2 results?
 
+    -   take the difference between the contrast
+
 -   negative ES means downregulation\[Gemini: Yes, in average the genes are downregulated\]? Why is the directional and non-directional FGSEA so different?
+
+    -   look at biology, choose focus
 
 -   What is leading Edge in the FGSEA analysis?
 
 -   Why do we have so few significant isoform and genes in the 77 datatset
 
+    -   ensure it is the same for both datasets
+
+    -   then interpret
+
 -   Why do we use fishers test to integrate two transcriptional dataset? Why not edingtons? Is DeSeq and DEXSeq not from the same level
+
+    -   use different ones for the two levels of integration
 
 -   Why using unadjusted pvalue for integration?
 
+    -   use unadjusted
+
 -   Why do we suddenly have more significant genes in DEXSeq for 77 after the p-value integration
+
+    -   maybe adjustment was done on fewer genes now
 
 -   How long is the presentation supposed to be?
 
 # TODOs
 
 -   Find out the meaning of contrast in the Result pulliing of DeSeq2(Interpretation of Age as cofounder)
+
+    -   try out only age+condition
+
+    -   look at age distribution
+
+    -   do analysis inlcuding age
+
+-   Numberof genes in isoforms == number of genes in genecount
 
 -   Basic research on Parkinson(Sander)
 
