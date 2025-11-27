@@ -102,36 +102,39 @@ metadata_df_77 <- metadata_df_77 |>
     patient_type = str_extract(characteristics, "(?<=group: )[^,]+$")
   )
 
+head(metadata_df_77)
+```
 
-metadata_df_77 <- metadata_df_77 |>
+### Subset 77 data 
+
+```{r}
+metadata_df_77_sub <- metadata_df_77 |>
   filter(patient_type != "Young_adult")
 
-head(metadata_df_77)
+correct_samples <- metadata_df_77_sub$sample_id
+
+isoform_count_77_sub <- isoform_count_77[, colnames(isoform_count_77) %in% correct_samples]
+```
+
+```{r}
+dim(isoform_count_77)
+dim(isoform_count_77_sub)
 ```
 
 # Load Result files
 
 ```{r}
-#res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
-res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
-res_gender_77 <- readRDS('../data/deseq2_results_77.rds')
-#res_gender_77 <- readRDS('../data/deseq2_object_77.rds')
+res_gender_age_08 <- readRDS('../data/deseq2_results_08_age.rds')
+res_gender_age_77 <- readRDS('../data/deseq2_results_77_age.rds')
 dxdResult_08 <- readRDS('../data/dexseq_results_08.rds')
 dxdResult_77 <- readRDS('../data/dexseq_results_77.rds')
 ```
 
 ```{r}
-df_deseq_08 <- as.data.frame(res_gender_08)
-df_deseq_77 <- as.data.frame(res_gender_77)
+df_deseq_08_age <- as.data.frame(res_gender_08_age)
+df_deseq_77_age <- as.data.frame(res_gender_77_age)
 df_dexseq_08 <- as.data.frame(dxdResult_08)
 df_dexseq_77 <- as.data.frame(dxdResult_77)
-```
-
-```{r}
-res_gender_age_08 <- readRDS('../data/deseq2_object_08_age.rds')
-res_gender_age_77 <- readRDS('../data/deseq2_results_77_age.rds')
-df_deseq_08_age <- as.data.frame(res_gender_08)
-df_deseq_77_age <- as.data.frame(res_gender_77)
 ```
 
 # Questions

@@ -3,9 +3,9 @@ title: "DESeq"
 format: html
 ---
 
-### DESeq analysis
+# DESeq analysis
 
-#### Load environment and data
+## Load environment and data
 
 ```{r}
 library(tidyverse)
@@ -14,11 +14,13 @@ library(fgsea)
 library(msigdbr)
 ```
 
-##### Check that colnames in count data and row names of metadata are in the same order
+Check that colnames in count data and row names of metadata are in the same order
 
 ```{r}
 all(metadata_df_77$sample == colnames(gene_count_77))
 ```
+
+# DeSeq Condition
 
 ```{r}
 dds_77 <- DESeqDataSetFromMatrix(
@@ -69,7 +71,7 @@ nrow(gene_count_77)
 
 COMMENT ON THIS
 
-##### Correcting for gender confounder
+# DeSeq Condition&Gender
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
 
@@ -96,8 +98,6 @@ ggsave("../fig/pca_77_gender.png", plot = pca_77_gender)
 ```
 
 COMMENT ON THIS
-
-###### Co-factor
 
 ```{r}
 dds_gender_77 <- DESeq(dds_gender_77)
@@ -134,7 +134,11 @@ n_common_77
 
 COMMENT ON THIS
 
-##### Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
+```{r}
+saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")
+```
+
+# DeSeq Condition&Gender&Age
 
 ```{r}
 dds_gender_age_77 <- DESeqDataSetFromMatrix(
@@ -146,12 +150,6 @@ dds_gender_age_77 <- DESeqDataSetFromMatrix(
 ```{r}
 dds_gender_age_77 <- DESeq(dds_gender_age_77)
 
-```
-
-Save the object
-
-```{r}
-saveRDS(dds_gender_age_77, file = "../data/deseq2_object_77.rds")
 ```
 
 ```{r}
@@ -190,14 +188,17 @@ Save the results
 
 ```{r}
 saveRDS(res_gender_age_77, file = "../data/deseq2_results_77_age.rds")
-saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")
 ```
 
 Conclusion: age is not a confounder!
 
-#### Gene-set enrichment analysis
+# Gene-set enrichment analysis
 
-##### FSC
+!!Not with right results yet!!!
+
+TODO: Do with res_gender_age_77
+
+## FSC
 
 ```{r}
 BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
@@ -252,7 +253,7 @@ first_genes_77
 
 COMMENT ON THIS
 
-##### FSC as non-directional
+## FSC as non-directional
 
 ```{r}
 stats_abs_77 <- abs(myStats_77)

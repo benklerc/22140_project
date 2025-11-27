@@ -1,11 +1,15 @@
 ---
 title: "DESeq"
-format: html
+format:
+  html:
+    df-print: default
+    fig-format: png
+    fig-dpi: 300
+    execute:
+      dev: ragg_png
 ---
 
-### 
-
-#### Load environment and data
+# Load environment and data
 
 ```{r}
 library(tidyverse)
@@ -20,7 +24,7 @@ library(msigdbr)
 all(metadata_df_08$sample == colnames(gene_count_08))
 ```
 
-### DESeq Condition
+# DESeq Condition
 
 ```{r}
 dds_08 <- DESeqDataSetFromMatrix(
@@ -71,7 +75,7 @@ Out of 67,186 genes showed significant differential expression between the two g
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
 
-### DESeq Condition&Gender
+# DESeq Condition&Gender
 
 ```{r}
 dds_gender_08 <- DESeqDataSetFromMatrix(
@@ -100,8 +104,6 @@ This indicates that gender effects may also contribute to the overall variance i
 ```{r}
 ggsave("../fig/pca_08_gender.png", plot = pca_08_gender)
 ```
-
-###### Co-factor
 
 ```{r}
 dds_gender_08 <- DESeq(dds_gender_08)
@@ -142,9 +144,13 @@ Without gender in the model we get 518 DE genes; with gender we get 433, with 40
 
 Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
 
-### DESeq Condition&Gender&Age
+```{r}
+saveRDS(res_gender_08, file = "../data/deseq2_results_08.rds")
+```
 
-##### Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
+# DESeq Condition&Gender&Age
+
+Correcting for age confounder (Skriv til Kristoffer om PCA. Lav to modeller og beregn signifikante)
 
 ```{r}
 dds_gender_age_08 <- DESeqDataSetFromMatrix(
@@ -209,7 +215,13 @@ Age has a big influence on gene expression, but is not necessarily correlated wi
 
 Conclusion: age is not a confounder!
 
+```{r}
+saveRDS(res_gender_age_08, file = "../data/deseq2_results_08_age.rds")
+```
+
 ### DESeq Condition&Age
+
+TODO!
 
 ```{r}
 dds_gender_08 <- DESeqDataSetFromMatrix(
@@ -218,19 +230,13 @@ dds_gender_08 <- DESeqDataSetFromMatrix(
   design = ~ gender + age)
 ```
 
-## Save object and results
+# Gene-set enrichment analysis
 
-```{r}
-saveRDS(dds_gender_08, file = "../data/deseq2_object_08.rds")
-saveRDS(res_gender_08, file = "../data/deseq2_results_08.rds")
+!! Wrong results so far!!
 
-saveRDS(dds_gender_age_08, file = "../data/deseq2_object_08_age.rds")
-saveRDS(res_gender_age_08, file = "../data/deseq2_results_08_age.rds")
-```
+TODO: Do it with res_gender_age_08
 
-#### Gene-set enrichment analysis
-
-##### FSC
+## FSC
 
 ```{r}
 BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
@@ -241,7 +247,7 @@ BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
 # Create the ranked list of gene-level statistics
 myStats_08 <- res_gender_08[,"stat"]
 names(myStats_08) <- rownames(res_gender_08)
-`
+
 # Remove the ensembl version in the names
 clean_names_08 <- sub("\\.\\d+$", "", names(myStats_08))
 names(myStats_08) <- clean_names_08
@@ -274,7 +280,7 @@ In the most significant pathway, discover three genes that are implicated in thi
 
 ```{r}
 chosen_pathway_08 <- fg_sig_08$pathway[1]
-plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) +
+plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) 
 enrichment_08_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
 enrichment_08_direct
 ```
@@ -297,7 +303,7 @@ ENSG00000229295 (HLA-DPB1) : Important player in presenting antigen to APCs
 
 all upregulated
 
-##### FSC as non-directional
+## FSC as non-directional
 
 ```{r}
 stats_abs_08 <- abs(myStats_08)
