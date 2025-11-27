@@ -4,3 +4,14 @@ format: html
 ---
 
 # Dexseq vs Deseq analysis
+
+```{r}
+#converting to dataframe
+dxdResult_08_df <- as.data.frame(dxdResult_08)
+dxdResult_77_df <- as.data.frame(dxdResult_77)
+
+#ordering them:
+dxdResult_08_df <- dxdResult_08_df[order(dxdResult_08_df$padj),]
+dxdResult_77_df <- dxdResult_77_df[order(dxdResult_77_df$padj),]
+
+```
