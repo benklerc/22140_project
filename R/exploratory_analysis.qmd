@@ -102,8 +102,70 @@ head(metadata_df_77)
 # Load Result files
 
 ```{r}
-res_deseq_08 <- readRDS('../data/deseq2_results_08.rds')
-res_deseq_77 <- readRDS('../data/deseq2_results_77.rds')
-res_dexeq_08 <- readRDS('../data/dexseq_results_08.rds')
-res_dexeq_77 <- readRDS('../data/dexseq_results_08.rds')
+res_gender_08 <- readRDS('../data/deseq2_results_08.rds')
+#res_gender_08 <- readRDS('../data/deseq2_object_08.rds')
+res_gender_77 <- readRDS('../data/deseq2_results_77.rds')
+#res_gender_77 <- readRDS('../data/deseq2_object_77.rds')
+dxdResult_08 <- readRDS('../data/dexseq_results_08.rds')
+dxdResult_77 <- readRDS('../data/dexseq_results_77.rds')
+```
+
+```{r}
+df_deseq_08 <- as.data.frame(res_gender_08)
+df_deseq_77 <- as.data.frame(res_gender_77)
+df_dexseq_08 <- as.data.frame(dxdResult_08)
+df_dexseq_77 <- as.data.frame(dxdResult_77)
+```
+
+```{r}
+res_gender_age_08 <- readRDS('../data/deseq2_object_08_age.rds')
+res_gender_age_77 <- readRDS('../data/deseq2_results_77_age.rds')
+df_deseq_08_age <- as.data.frame(res_gender_08)
+df_deseq_77_age <- as.data.frame(res_gender_77)
+```
+
+# Questions
+
+-   Numberof genes in isoforms == number of genes in genecount
+
+-   Combine all 4 dataset, combine them all at once or pariwise and then 08 and 77 together
+
+-   significance of contrast in DeSeq2 results?
+
+-   negative ES means downregulation\[Gemini: Yes, in average the genes are downregulated\]? Why is the directional and non-directional FGSEA so different?
+
+-   What is leading Edge in the FGSEA analysis?
+
+-   Why do we have so few significant isoform and genes in the 77 datatset
+
+-   Why do we use fishers test to integrate two transcriptional dataset? Why not edingtons? Is DeSeq and DEXSeq not from the same level
+
+-   Why using unadjusted pvalue for integration?
+
+-   Why do we suddenly have more significant genes in DEXSeq for 77 after the p-value integration
+
+-   How long is the presentation supposed to be?
+
+# TODOs
+
+-   Find out the meaning of contrast in the Result pulliing of DeSeq2(Interpretation of Age as cofounder)
+
+-   Basic research on Parkinson(Sander)
+
+-   Maltes results for dexseq dataset 77
+
+-   77: remove young healthy adults, rerun DEXSeq(if more significant also need to rerun all other analysis)(Cecilie)
+
+-   Figure folder, save plots(PCA)(Amanda)
+
+-   Start Presentation(Cecilie)
+
+    -   introduction(Background-Sander, Data-Cora)
+
+-   
+
+```{r}
+isoform_count_08 %>% group_by()
+
+isoInfo
 ```

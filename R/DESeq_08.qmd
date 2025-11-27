@@ -39,7 +39,7 @@ dds_08
 plotPCA(rlog(dds_08), intgroup=c("groups"))
 ```
 
-PCA does not seem to capture healthy/parkinsons.
+PCA does not seem to capture healthy/parkinsons. There seem to be other factors which influence the gene expression other than the condition
 
 #### Testing for differential expression
 
@@ -188,17 +188,19 @@ n_common_08 <- length(intersect(signif_08, signif_gender_age_08))
 cat("number of overlapping significant genes when modelling with gender and age, and just condition: ",n_common_08)
 ```
 
+Age has a big influence on gene expression, but is not necessarily correlated with the condition
+
+Conclusion: age is not a confounder!
+
 Save object and results
 
 ```{r}
-saveRDS(dds_gender_08, file = "../data/deseq2_results_08.rds")
-saveRDS(res_gender_08, file = "../data/deseq2_object_08.rds")
+saveRDS(dds_gender_08, file = "../data/deseq2_object_08.rds")
+saveRDS(res_gender_08, file = "../data/deseq2_results_08.rds")
 
-saveRDS(dds_gender_age_08, file = "../data/deseq2_results_08_age.rds")
-saveRDS(res_gender_age_08, file = "../data/deseq2_object_08_age.rds")
+saveRDS(dds_gender_age_08, file = "../data/deseq2_object_08_age.rds")
+saveRDS(res_gender_age_08, file = "../data/deseq2_results_08_age.rds")
 ```
-
-Conclusion: age is not a confounder! (actually only introduces more bias?)
 
 #### Gene-set enrichment analysis
 
@@ -261,6 +263,8 @@ ENSG00000136235 (GPNMB):
 ENSG00000155659 (VSIG4): Phagocytic receptor, strong negative regulator of T-cell proliferation and IL2 production. 
 
 ENSG00000229295 (HLA-DPB1) : Important player in presenting antigen to APCs
+
+all upregulated
 
 ##### FSC as non-directional
 

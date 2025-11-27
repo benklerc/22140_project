@@ -123,6 +123,9 @@ filter_low_expression <- function(count_matrix, metadata = NULL, threshold = 10)
 isoform_count_08 <- filter_low_expression(isoform_count_08, metadata = metadata_df_08, threshold = 10)
 isoform_count_77 <- filter_low_expression(isoform_count_77, metadata = metadata_df_77, threshold = 10)
 
+
+dim(isoform_count_08)
+dim(isoform_count_77)
 # Subset isoInfo to match the transcripts present in the count matrix
 ## We should also do this subset info matching for count_77
 
@@ -168,6 +171,7 @@ dxdSubset <- estimateExonFoldChanges(dxdSubset, fitExpToVar="groups")
 #| warning: false
 dxdResult <- DEXSeqResults(dxdSubset)
 alpha <- 0.05
+#dxdResult <- dxdResult_08
 # Significant isoforms (rows)
 sig_iso <- dxdResult[!is.na(dxdResult$padj) & dxdResult$padj < alpha, ]
 n_sig_isoforms <- nrow(sig_iso)
@@ -247,6 +251,10 @@ print(n_sig_genes)
 ```{r}
 # See the most significant genes
 dexseq_df <- as.data.frame(dxdResult_77)
+dexseq_df %>% 
+  na.omit() %>% 
+  filter(padj < 0.05)
+
 dexseq_df <- dexseq_df[order(dexseq_df$padj), ]
 top10_genes <- dexseq_df$groupID[!is.na(dexseq_df$padj)][1:10]
 top10_genes
