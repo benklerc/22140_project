@@ -191,8 +191,11 @@ cat("number of overlapping significant genes when modelling with gender and age,
 Save object and results
 
 ```{r}
-saveRDS(dds_gender_age_08, file = "../data/deseq2_results_08.rds")
-saveRDS(res_gender_age_08, file = "../data/deseq2_object_08.rds")
+saveRDS(dds_gender_08, file = "../data/deseq2_results_08.rds")
+saveRDS(res_gender_08, file = "../data/deseq2_object_08.rds")
+
+saveRDS(dds_gender_age_08, file = "../data/deseq2_results_08_age.rds")
+saveRDS(res_gender_age_08, file = "../data/deseq2_object_08_age.rds")
 ```
 
 Conclusion: age is not a confounder! (actually only introduces more bias?)

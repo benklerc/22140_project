@@ -170,7 +170,8 @@ cat("number of overlapping significant genes when modelling with gender and age,
 Save the results
 
 ```{r}
-saveRDS(res_gender_age_77, file = "../data/deseq2_results_77.rds")
+saveRDS(res_gender_age_77, file = "../data/deseq2_results_77_age.rds")
+saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")
 ```
 
 Conclusion: age is not a confounder!
