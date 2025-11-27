@@ -100,6 +100,15 @@ metadata_df_77 <- metadata_df_77 |>
     age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
   )
 
+metadata_df_77 <- metadata_df_77 |>
+  mutate(
+    patient_type = str_extract(characteristics, "(?<=group: )[^,]+$")
+  )
+
+
+metadata_df_77 <- metadata_df_77 |>
+  filter(patient_type != "Young_adult")
+
 head(metadata_df_77)
 ```
 
