@@ -29,7 +29,6 @@ paste0(
 'Homo_sapiens.GRCh38.107.chr_patch_hapl_scaff_tx_info.Rds'
 )
 )
-
 ```
 
 ### Meta data
