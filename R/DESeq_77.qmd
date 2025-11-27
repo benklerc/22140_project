@@ -36,7 +36,12 @@ dds_77
 ```
 
 ```{r}
-plotPCA(rlog(dds_77), intgroup=c("groups"))
+pca_77 <- plotPCA(rlog(dds_77), intgroup=c("groups"))
+pca_77
+```
+
+```{r}
+ggsave("../fig/pca_77.png", plot = pca_77)
 ```
 
 COMMENT ON THIS
