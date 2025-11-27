@@ -21,23 +21,23 @@ Joined(inner) dataset with p values from both datsets(08, 77) and both analysis(
 
 ```{r}
 diff_gene_expr_08 <- as.data.frame(res_gender_08) %>% 
-  select(pvalue) %>% 
+  dplyr::select(pvalue) %>% 
   rownames_to_column(var = 'Genes') %>% 
-  rename(deseq_08_pval = pvalue )
+  dplyr::rename(deseq_08_pval = pvalue )
 diff_gene_expr_77 <- as.data.frame(res_gender_77) %>% 
-  select(pvalue) %>% 
+  dplyr::select(pvalue) %>% 
   rownames_to_column(var = 'Genes') %>% 
-  rename(deseq_77_pval = pvalue)
-diff_transcript_expr_08 <- as.data.frame(dxdResult) %>% 
-  select(groupID, pvalue) %>% 
-  rename(
+  dplyr::rename(deseq_77_pval = pvalue)
+diff_transcript_expr_08 <- as.data.frame(dxdResult_08) %>% 
+  dplyr::select(groupID, pvalue) %>% 
+  dplyr::rename(
     Genes = groupID
   ) %>% 
   group_by(Genes) %>% 
   summarise(dexseq_08_pval = min(pvalue))
 diff_transcript_expr_77 <- as.data.frame(dxdResult_77) %>% 
-  select(groupID, pvalue) %>% 
-  rename(
+  dplyr::select(groupID, pvalue) %>% 
+  dplyr::rename(
     Genes = groupID
   ) %>% 
   group_by(Genes) %>% 
@@ -46,12 +46,6 @@ diff_transcript_expr_77 <- as.data.frame(dxdResult_77) %>%
 dim(diff_gene_expr_08)
 dim(diff_transcript_expr_08)
 dim(diff_transcript_expr_77)
-```
-
-```{r}
-load(file='/home/projects/22140/exercise7_data.Rdata')
-nrow(jointDiffRes)
-length(unique(jointDiffRes$gene_id))
 ```
 
 ```{r}
@@ -66,7 +60,6 @@ full_diff_analysis
 # Fishers Method
 
 ```{r}
-pval_cols <- c(colnames(full_diff_analysis),-c('Genes'))
 full_diff_analysis <- full_diff_analysis |>
   rowwise() |>
   mutate(
