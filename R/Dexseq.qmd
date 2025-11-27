@@ -155,6 +155,7 @@ dxdSubset <- estimateSizeFactors(dxdSubset)
 # Estimate dispersions
 dxdSubset <- estimateDispersions(dxdSubset)
 
+
 # Test for Differential Exon Usage (DEU)
 dxdSubset <- testForDEU(
   dxdSubset,
