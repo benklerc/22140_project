@@ -38,7 +38,7 @@ dexseq_to_genelevel <- function(x) {
       gene_id   = groupID,
       isoform_id = featureID,
       stat,
-      log2FC = log2fold_Primary_Tumor_Solid_Tissue_Normal,
+      log2FC = log2fold_parkinson.s_healthy,
       pvalue,
       padj
     ) %>%
@@ -57,5 +57,30 @@ dexseq_to_genelevel <- function(x) {
 ### 08 analysis
 
 ```{r}
+# dexseq per-gene q-values
+alpha <- 0.05
 dex_gene_08 <- dexseq_to_genelevel(dxdResult_08)
+
+dex_gene_08 <- dex_gene_08 %>%
+  mutate(gene_id, dex_padj_08 = padj,
+         dex_sig_08 = !is.na(padj) & padj < alpha)
+#Deseq2 gene_level q-values
+deseq_gene_08 <- deseq_08_df %>%
+  mutate(gene_id, deseq_padj = padj,
+         deseq_sig_08 = !is.na(padj) & padj < alpha)
+
+#gene universe = genes present in both results
+
+univ_08 <- intersect(dex_gene_08$gene_id, deseq_gene_08$gene_id)
+
+both_08 <- dex_gene_08 %>%
+  filter(gene_id %in% univ_08) %>%
+  mutate(gene_id, dex_sig_08) %>%
+  inner_join(deseq_gene_08 %>%
+               filter(gene_id %in% univ_08) %>%
+               mutate(gene_id, deseq_sig_08), by = "gene_id")
+# Contigency table(dexseq vs deseq significance)
+contig_tab_08 <- table(DEXseq_08 = both_08$dex_sig_08, DESeq2_08 = both_08$deseq_sig__08)
+contig_tab_08
+
 ```
