@@ -131,8 +131,8 @@ dxdResult_77 <- readRDS('../data/dexseq_results_77.rds')
 ```
 
 ```{r}
-df_deseq_08_age <- as.data.frame(res_gender_08_age)
-df_deseq_77_age <- as.data.frame(res_gender_77_age)
+df_deseq_08_age <- as.data.frame(res_gender_age_08)
+df_deseq_77_age <- as.data.frame(res_gender_age_77)
 df_dexseq_08 <- as.data.frame(dxdResult_08)
 df_dexseq_77 <- as.data.frame(dxdResult_77)
 ```
