@@ -105,7 +105,7 @@ metadata_df_77 <- metadata_df_77 |>
 head(metadata_df_77)
 ```
 
-### Subset 77 data 
+### Subset 77 data
 
 ```{r}
 metadata_df_77_sub <- metadata_df_77 |>
@@ -135,6 +135,11 @@ df_deseq_08_age <- as.data.frame(res_gender_08_age)
 df_deseq_77_age <- as.data.frame(res_gender_77_age)
 df_dexseq_08 <- as.data.frame(dxdResult_08)
 df_dexseq_77 <- as.data.frame(dxdResult_77)
+```
+
+```{r}
+dxdResult_77_sub <- readRDS('../data/dexseq_results_77_sub.rds')
+df_dexseq_77_sub <- as.data.frame(dxdResult_77_sub)
 ```
 
 # Questions
