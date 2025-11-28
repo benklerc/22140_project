@@ -112,3 +112,77 @@ stats_deseq_08 <- setNames(deseq_vals_08, deseq_names_08)
 stats_deseq_08 <- stats_deseq_08[!is.na(stats_deseq_08)]
 stats_deseq_08 >- sort(stats_deseq_08, decreasing = TRUE)
 ```
+
+```{r}
+# Create the ranked list of isoform-level statistics
+dex_names_08 <- sub("\\.\\d+$", "", dex_gene_08$gene_id)
+dex_vals_08 <- dex_gene_08$stat
+stats_dex_08 <- setNames(dex_vals_08, dex_names_08)
+stats_dex_08 <- stats_dex_08[!is.na(stats_dex_08)]
+stats_dex_08 <- sort(stats_dex_08, decreasing = TRUE)
+```
+
+```{r}
+fg_deseq_08 <- fgseaMultilevel(pathways = BP_list, stats = stats_deseq_08,
+minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_dex_08 <- fgseaMultilevel(pathways = BP_list, stats = stats_dex_08,
+minSize = 15, maxSize = 500, scoreType = "std")
+
+```
+
+```{r}
+sig_deseq_08 <- fg_deseq_08 %>% filter(padj < alpha) %>% arrange(padj)
+sig_dex_08 <- fg_dex_08 %>% filter(padj < alpha) %>% arrange(padj)
+# counts
+
+n_sig_de_08 <- nrow(sig_deseq_08)
+n_sig_dx_08 <- nrow(sig_dex_08)
+# shared pathways (by name)
+shared_08 <- intersect(sig_deseq_08$pathway, sig_dex_08$pathway)
+n_shared_08 <- length(shared_08)
+c(n_shared_08, n_sig_de_08, n_sig_dx_08)
+```
+
+**We get 0 shared genes, because there is for some reason 0 significant genes in the dexseq, and 1828 in the deseq**
+
+```{r}
+
+# Keep just what we need and rename
+de_df_08 <- fg_deseq_08 %>%
+transmute(pathway, NES_de_08 = NES, padj_de_08 = padj)
+dx_df_08 <- fg_dex_08 %>%
+transmute(pathway, NES_dx_08 = NES, padj_dx_08 = padj)
+# Merge on pathway (shared sets only)
+cmp_08 <- inner_join(de_df_08, dx_df_08, by = "pathway") %>%
+mutate(sig_cat_08 = case_when(
+padj_de_08 < alpha & padj_dx_08 < alpha ~ "Both",
+padj_de_08 < alpha & padj_dx_08 >= alpha ~ "DESeq2 only",
+padj_de_08 >= alpha & padj_dx_08 < alpha ~ "DEXSeq only",
+TRUE ~ "None"
+)) %>%
+mutate(sig_cat_08 = factor(sig_cat_08, levels = c("Both","DESeq2 only","DEXSeqonly","None")))
+```
+
+```{r}
+# Scatter + smooth
+ggplot(cmp_08, aes(x = NES_de_08, y = NES_dx_08, color = sig_cat_08)) +
+geom_point(alpha = 0.8) +
+geom_smooth(method = "lm", se = FALSE) +
+labs(
+x = "NES (DESeq2 fgsea)",
+y = "NES (DEXSeq fgsea)",
+color = "Significance",
+title = "NES comparison: DESeq2 vs DEXSeq (fgseaMultilevel)"
+) +
+theme_minimal()
+```
+
+**Spearman correlation**
+
+```{r}
+spearman_cor_08 <- cor(cmp_08$NES_de_08, cmp_08$NES_dx_08, method = "spearman", use ="complete.obs")
+spearman_cor_08
+```
