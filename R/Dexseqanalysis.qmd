@@ -186,3 +186,202 @@ theme_minimal()
 spearman_cor_08 <- cor(cmp_08$NES_de_08, cmp_08$NES_dx_08, method = "spearman", use ="complete.obs")
 spearman_cor_08
 ```
+
+# 77 ANALYSIS (Parallel to 08)
+
+```{r}
+alpha <- 0.05
+
+# ---------------------------------------------------------------------------
+# 1) Convert DEXSeq to gene-level statistics
+# ---------------------------------------------------------------------------
+
+dex_gene_77 <- dexseq_to_genelevel(dxdResult_77)
+
+dex_gene_77 <- dex_gene_77 %>%
+  mutate(
+    gene_id,
+    dex_padj_77 = padj,
+    dex_sig_77 = !is.na(padj) & padj < alpha
+  )
+
+# ---------------------------------------------------------------------------
+# 2) Prepare DESeq2 gene-level dataframe
+# ---------------------------------------------------------------------------
+
+deseq_gene_77 <- deseq_77_df %>%
+  mutate(
+    gene_id,
+    deseq_padj_77 = padj,
+    deseq_sig_77 = !is.na(padj) & padj < alpha
+  )
+
+# ---------------------------------------------------------------------------
+# 3) Universe of overlapping genes
+# ---------------------------------------------------------------------------
+
+univ_77 <- intersect(dex_gene_77$gene_id, deseq_gene_77$gene_id)
+
+# ---------------------------------------------------------------------------
+# 4) Combine per-gene significance for both methods
+# ---------------------------------------------------------------------------
+
+both_77 <- dex_gene_77 %>%
+  filter(gene_id %in% univ_77) %>%
+  mutate(gene_id, dex_sig_77) %>%
+  inner_join(
+    deseq_gene_77 %>%
+      filter(gene_id %in% univ_77) %>%
+      mutate(gene_id, deseq_sig_77),
+    by = "gene_id"
+  )
+
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+
+```
+
+# 5) Contingency table (DEXSeq vs DESeq2 significance)
+
+```{r}
+contig_tab_77 <- table(
+  DEXSeq_77 = both_77$dex_sig_77,
+  DESeq2_77 = both_77$deseq_sig_77
+)
+contig_tab_77
+
+
+```
+
+6)  Fisher test for enrichment of overlapping significant genes
+
+```{r}
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+
+ft_77 <- fisher.test(contig_tab_77, alternative = "greater")
+ft_77
+
+#
+```
+
+7)  MSigDB pathways (already loaded)
+8)  Ranked DESeq2 statistics
+
+```{r}
+deseq_names_77 <- sub("\\.\\d+$", "", deseq_gene_77$gene_id)
+deseq_vals_77 <- deseq_gene_77$stat
+stats_deseq_77 <- setNames(deseq_vals_77, deseq_names_77)
+stats_deseq_77 <- stats_deseq_77[!is.na(stats_deseq_77)]
+stats_deseq_77 <- sort(stats_deseq_77, decreasing = TRUE)
+```
+
+```{r}
+
+```
+
+9)  Ranked DEXSeq (per-gene) statistics
+
+```{r}
+
+dex_names_77 <- sub("\\.\\d+$", "", dex_gene_77$gene_id)
+dex_vals_77 <- dex_gene_77$stat
+stats_dex_77 <- setNames(dex_vals_77, dex_names_77)
+stats_dex_77 <- stats_dex_77[!is.na(stats_dex_77)]
+stats_dex_77 <- sort(stats_dex_77, decreasing = TRUE)
+```
+
+10) fgseaMultilevel for DESeq2 and DEXSeq
+
+```{r}
+fg_deseq_77 <- fgseaMultilevel(
+  pathways = BP_list,
+  stats = stats_deseq_77,
+  minSize = 15,
+  maxSize = 500,
+  scoreType = "std"
+)
+
+fg_dex_77 <- fgseaMultilevel(
+  pathways = BP_list,
+  stats = stats_dex_77,
+  minSize = 15,
+  maxSize = 500,
+  scoreType = "std"
+)
+```
+
+11) Significant pathways
+
+```{r}
+sig_deseq_77 <- fg_deseq_77 %>% filter(padj < alpha) %>% arrange(padj)
+sig_dex_77   <- fg_dex_77   %>% filter(padj < alpha) %>% arrange(padj)
+
+n_sig_de_77  <- nrow(sig_deseq_77)
+n_sig_dx_77  <- nrow(sig_dex_77)
+
+shared_77 <- intersect(sig_deseq_77$pathway, sig_dex_77$pathway)
+n_shared_77 <- length(shared_77)
+
+c(n_shared_77, n_sig_de_77, n_sig_dx_77)
+
+```
+
+12) Merge fgsea results for NES comparison
+
+```{r}
+
+
+de_df_77 <- fg_deseq_77 %>%
+  transmute(pathway, NES_de_77 = NES, padj_de_77 = padj)
+
+dx_df_77 <- fg_dex_77 %>%
+  transmute(pathway, NES_dx_77 = NES, padj_dx_77 = padj)
+
+cmp_77 <- inner_join(de_df_77, dx_df_77, by = "pathway") %>%
+  mutate(
+    sig_cat_77 = case_when(
+      padj_de_77 < alpha & padj_dx_77 < alpha ~ "Both",
+      padj_de_77 < alpha & padj_dx_77 >= alpha ~ "DESeq2 only",
+      padj_de_77 >= alpha & padj_dx_77 < alpha ~ "DEXSeq only",
+      TRUE ~ "None"
+    )
+  ) %>%
+  mutate(
+    sig_cat_77 = factor(sig_cat_77, 
+                        levels = c("Both", "DESeq2 only", "DEXSeq only", "None"))
+  )
+```
+
+# 13) NES scatterplot comparison
+
+```{r}
+# ---------------------------------------------------------------------------
+
+ggplot(cmp_77, aes(x = NES_de_77, y = NES_dx_77, color = sig_cat_77)) +
+  geom_point(alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    x = "NES (DESeq2 fgsea)",
+    y = "NES (DEXSeq fgsea)",
+    color = "Significance",
+    title = "NES comparison: DESeq2 vs DEXSeq (fgseaMultilevel) — Dataset 77"
+  ) +
+  theme_minimal()
+
+```
+
+14) Spearman correlation
+
+```{r}
+# ---------------------------------------------------------------------------
+
+spearman_cor_77 <- cor(
+  cmp_77$NES_de_77,
+  cmp_77$NES_dx_77,
+  method = "spearman",
+  use = "complete.obs"
+)
+spearman_cor_77
+```
