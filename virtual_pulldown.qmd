@@ -1,0 +1,223 @@
+---
+title: "test"
+format: html
+editor: visual
+---
+
+## Virtual pulldown
+
+```{r}
+library(igraph)
+library(ggraph)
+load(file='/home/projects/22140/exercise7_ppi.Rdata')
+
+
+ppi_genes <- unique(c(ppi$from, ppi$to))
+deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
+dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+alpha <- 0.05
+
+# Convert to data.frame so dplyr can work
+sig_iso <- dxdResult_08
+
+sig_iso <- sig_iso[!is.na(sig_iso$padj) & sig_iso$padj < alpha, ]
+n_sig_isoforms <- nrow(sig_iso)
+print(n_sig_isoforms)
+
+n_sig_genes <- length(unique(sig_iso$groupID))
+print(n_sig_genes)
+
+sig_iso2 <- deseq2Result_08
+
+sig_iso2 <- sig_iso2[!is.na(sig_iso2$padj) & sig_iso2$padj < alpha, ]
+n_sig_isoforms2 <- nrow(sig_iso2)
+print(n_sig_isoforms2)
+```
+
+```{r}
+sig_iso2
+```
+
+So this is a protein protein interaction database, which should basically have all the proteins we are interested in.
+
+```{r}
+deseq2Result_08
+```
+
+```{r}
+in_ppi <- sig_iso %>%
+  as.data.frame() %>%
+  filter(groupID %in% ppi_genes)
+```
+
+```{r}
+library(dplyr)
+top100_dexseq <- in_ppi %>%
+  arrange(padj) %>%
+  distinct(groupID, .keep_all = TRUE) %>%
+  slice_head(n = 100) %>%
+  pull(groupID)
+```
+
+```{r}
+in_ppi2 <- sig_iso2 %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("groupID") %>% 
+  filter(groupID %in% ppi_genes)
+```
+
+```{r}
+library(dplyr)
+top100_deseq2 <- in_ppi2 %>%
+  arrange(padj) %>%
+  distinct(groupID, .keep_all = TRUE) %>% 
+  slice_head(n = 100) %>%
+  pull(groupID)
+```
+
+```{r}
+overlap_genes <- intersect(top100_deseq2, top100_dexseq)
+length(overlap_genes)
+```
+
+```{r}
+
+seeds <- unique(c(top100_dexseq,top100_deseq2))
+g <- graph_from_data_frame(ppi, directed = FALSE)
+```
+
+```{r}
+seed_neighbors <- ego(
+  graph = g,
+  order = 1,
+  nodes = V(g)[name %in% seeds],
+  mode = "all"
+)
+
+sub_nodes_names <- unique(unlist(lapply(seed_neighbors, as_ids)))
+
+g_sub <- induced_subgraph(
+  g,
+  vids = V(g)[name %in% sub_nodes_names]
+)
+```
+
+```{r}
+filter_virtual_pulldown <- function(subGraph, parentGraph, cutoff = 0.7) {
+
+  if (is.null(V(subGraph)$name) || is.null(V(parentGraph)$name))
+    stop("Graphs must have vertex 'name' attributes.")
+
+  mode <- "all"
+  vn <- V(subGraph)$name
+
+  deg_full     <- degree(parentGraph, v = vn, mode = mode)
+  deg_internal <- degree(subGraph, mode = mode)
+
+  res <- data.frame(
+    node = vn,
+    deg_internal = deg_internal,
+    deg_full = deg_full,
+    frac_internal = ifelse(deg_full > 0, deg_internal / deg_full, NA_real_),
+    stringsAsFactors = FALSE
+  )
+
+  nodes_to_keep <- res$node[!is.na(res$frac_internal) &
+                              res$frac_internal >= cutoff]
+
+  filteredSubGraph <- induced_subgraph(
+    subGraph,
+    vids = V(subGraph)[name %in% nodes_to_keep]
+  )
+
+  V(filteredSubGraph)$frac_internal <-
+    res$frac_internal[match(V(filteredSubGraph)$name, res$node)]
+
+  filteredSubGraph
+}
+
+```
+
+```{r}
+g_filt <- filter_virtual_pulldown(g_sub, g, cutoff = 0.7)
+
+```
+
+```{r}
+cl <- cluster_louvain(g_filt, weights = NULL, resolution = 0.2)
+
+cluster_vec <- membership(cl)
+V(g_filt)$cluster <- factor(cluster_vec)
+
+clusters_df <- data.frame(
+  gene_id = names(cluster_vec),
+  cluster = as.integer(cluster_vec),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r}
+sig_genes <- unique(sig_iso$groupID)
+sig_dx <- sig_genes       # from sig_iso
+universe <- clusters_df$gene_id
+```
+
+```{r}
+enrich_method <- function(sig_set, clusters_df, min_size = 10) {
+
+  res <- lapply(sort(unique(clusters_df$cluster)), function(k) {
+    genes_cl <- clusters_df$gene_id[clusters_df$cluster == k]
+    if (length(genes_cl) < min_size) return(NULL)
+
+    other <- setdiff(universe, genes_cl)
+
+    a <- sum(genes_cl %in% sig_set)
+    b <- length(genes_cl) - a
+    c <- sum(other %in% sig_set)
+    d <- length(other) - c
+
+    ft <- fisher.test(matrix(c(a,b,c,d), nrow = 2),
+                      alternative = "greater")
+
+    data.frame(
+      cluster = k,
+      size = length(genes_cl),
+      a = a, b = b, c = c, d = d,
+      pval = ft$p.value, odds = unname(ft$estimate)
+    )
+  })
+
+  res <- bind_rows(res)
+  if (nrow(res)) res <- mutate(res, padj = p.adjust(pval, method = "BH"))
+  res
+}
+
+```
+
+```{r}
+res_dx <- enrich_method(sig_dx, clusters_df)
+```
+
+```{r}
+res_dx
+```
+
+```{r}
+#ggraph(g_filt, layout = "fr") +
+ # geom_edge_link(alpha = 0.15) +
+ # geom_node_point(aes(color = cluster), size = 3) +
+ # theme_void() +
+ # ggtitle("Louvain clustering on filtered PPI network")
+```
+
+```{r}
+#cluster_id <- 1   # choose any cluster
+#subg <- induced_subgraph(g_filt, vids = which(V(g_filt)$cluster == cluster_id))
+
+#ggraph(subg, layout = "fr") +
+#  geom_edge_link(alpha = 0.2) +
+#  geom_node_point(aes(color = cluster), size = 3) +
+#  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+ # theme_void() +
+ # ggtitle(paste("Subgraph for Louvain cluster", cluster_id))
+```
