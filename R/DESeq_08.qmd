@@ -267,12 +267,12 @@ nrow(fg_sig_08)
 ```
 
 ```{r}
-fg_sig_08[1:100]
+fg_sig_08[1:100, c("pathway", "padj", "NES")]
 ```
 
 Positive regulation increases expression
 
-Among the top 10 significant gene-set, there is a clear immune repose, T cell activation, Leukocyte proliferation theme.
+Among the top 10 significant gene-set, there is a clear downregulation of immune repose, T cell activation, Leukocyte proliferation theme.
 
 α-synuclein-specific T cells appear in PD; T cells infiltrate brain and promote neurodegeneration
 

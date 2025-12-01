@@ -113,7 +113,10 @@ metadata_df_77_sub <- metadata_df_77 |>
 
 correct_samples <- metadata_df_77_sub$sample_id
 
+gene_count_77_sub <- gene_count_77[, colnames(gene_count_77) %in% correct_samples]
+
 isoform_count_77_sub <- isoform_count_77[, colnames(isoform_count_77) %in% correct_samples]
+
 ```
 
 ```{r}
