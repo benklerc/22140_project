@@ -256,11 +256,17 @@ summarize_data <- function(counts_df, metadata_df, dataset_name) {
   # Use stringr to combine conditions into a single string
   conditions_str <- str_c(conditions, collapse = " / ")
   
+# Calculate specific sample counts
+  num_parkinsons <- sum(metadata_df$groups == "parkinson's", na.rm = TRUE)
+  num_healthy <- sum(metadata_df$groups == "healthy", na.rm = TRUE)
+  
   # Create a data frame for the summary
   data.frame(
     Dataset = dataset_name,
     `Number of Genes` = num_genes,
-    `Number of Samples` = num_samples,
+    `Total Samples` = num_samples,
+    `Parkinson's Samples` = num_parkinsons,
+    `Healthy Samples` = num_healthy,
     Conditions = conditions_str,
     check.names = FALSE
   )
