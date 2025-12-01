@@ -194,7 +194,7 @@ Conclusion: age is not a confounder!
 
 # Gene-set enrichment analysis
 
-!!Not with right results yet!!!
+!!Not with right results yet!!
 
 TODO: Do with res_gender_age_77
 
