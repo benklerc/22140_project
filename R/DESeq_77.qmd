@@ -29,7 +29,7 @@ dds_77 <- DESeqDataSetFromMatrix(
   design = ~ groups)
 ```
 
-#### PCA plot
+### PCA plot
 
 converting counts to integer mode
 
@@ -48,7 +48,7 @@ ggsave("../fig/pca_77.png", plot = pca_77)
 
 COMMENT ON THIS
 
-#### Testing for differential expression
+### Testing for differential expression
 
 ```{r}
 dds_77 <- DESeq(dds_77)
@@ -212,7 +212,7 @@ saveRDS(res_gender_age_77, file = "../data/deseq2_results_77_age.rds")
 
 Conclusion: age is not a confounder!
 
-### MA-plot
+### MA-plot inlc gender + age
 
 ```{r}
 plotMA(res_gender_age_77, ylim=c(-2,2))
