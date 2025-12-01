@@ -74,12 +74,16 @@ COMMENT ON THIS
 ### MA-plot
 
 ```{r}
-ggsave("../fig/MA_77.png", plot = MA_77)
-png(filename = "../fig/MA_77.png")
 plotMA(res_77, ylim=c(-2,2))
 dev.off()
 
-plotMA(res_77, ylim=c(-2,2))
+MA_77 <- plotMA(res_77, ylim=c(-2,2))
+
+```
+
+```{r}
+ggsave("../fig/MA_77.png", plot = MA_77)
+png(filename = "../fig/MA_77.png")
 
 ```
 
@@ -207,12 +211,15 @@ Conclusion: age is not a confounder!
 ### MA-plot
 
 ```{r}
-ggsave("../fig/MA_gender_age_77.png", plot = MA_gender_age_77)
-png(filename = "../fig/MA_gender_age_77.png")
 plotMA(res_gender_age_77, ylim=c(-2,2))
 dev.off()
 
-plotMA(res_gender_age_77, ylim=c(-2,2))
+MA_gender_age_77 <- plotMA(res_gender_age_77, ylim=c(-2,2))
+```
+
+```{r}
+ggsave("../fig/MA_gender_age_77.png", plot = MA_gender_age_77)
+png(filename = "../fig/MA_gender_age_77.png")
 
 ```
 
@@ -260,8 +267,7 @@ COMMENT ON THIS
 
 ```{r}
 chosen_pathway_77 <- fg_sig_77$pathway[1]
-plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +
-enrichment_77_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct <- plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
 enrichment_77_direct
 ```
 
@@ -319,8 +325,7 @@ COMMENT ON THIS
 
 ```{r}
 chosen_pathway_77 <- fg_sig_77$pathway[1]
-plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +
-enrichment_77_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct <- plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
 enrichment_77_direct
 ```
 
