@@ -10,6 +10,9 @@ library(DEXSeq)
 library(fgsea)
 library(msigdbr)
 library(stringr)
+library(knitr)
+library(dplyr)
+library(tidyr)
 
 load(file='/home/projects/22140/exam_data/exam_functions.Rdata')
 
@@ -143,6 +146,176 @@ df_dexseq_77 <- as.data.frame(dxdResult_77)
 ```{r}
 dxdResult_77_sub <- readRDS('../data/dexseq_results_77_sub.rds')
 df_dexseq_77_sub <- as.data.frame(dxdResult_77_sub)
+```
+
+# Distributions
+
+```{r}
+### Dataset 08: GSE106608 (Brain sample) Metadata ###
+
+# Gender Distribution (Bar Plot)
+plot_08_gender <- metadata_df_08 |>
+  ggplot(aes(x = gender, fill = gender)) +
+  geom_bar() +
+  labs(
+    title = "Gender Distribution (brain sample)",
+    x = "Gender",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+print(plot_08_gender)
+
+# Groups Distribution (Bar Plot)
+plot_08_groups <- metadata_df_08 |>
+  ggplot(aes(x = groups, fill = groups)) +
+  geom_bar() +
+  labs(
+    title = "Group Distribution (brain sample)",
+    x = "Group",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+print(plot_08_groups)
+
+# Age Distribution (Density Plot)
+plot_08_age <- metadata_df_08 |>
+  ggplot(aes(x = age)) +
+  geom_density(fill = "lightblue", alpha = 0.7) +
+  geom_vline(aes(xintercept = mean(age, na.rm = TRUE)), 
+             linetype = "dashed", color = "red") +
+  labs(
+    title = "Age Distribution (brain sample)",
+    x = "Age",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+print(plot_08_age)
+
+
+### Dataset 77: GSE128177 (Muscle sample) Subset Metadata ###
+
+# We use metadata_df_77_sub as defined in your setup code
+# Gender Distribution (Bar Plot)
+plot_77_gender <- metadata_df_77_sub |>
+  ggplot(aes(x = gender, fill = gender)) +
+  geom_bar() +
+  labs(
+    title = "Gender Distribution (Muscle sample)",
+    x = "Gender",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+
+print(plot_77_gender)
+
+# Groups Distribution (Bar Plot)
+plot_77_groups <- metadata_df_77_sub |>
+  ggplot(aes(x = groups, fill = groups)) +
+  geom_bar() +
+  labs(
+    title = "Group Distribution (Muscle sample)",
+    x = "Group",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+print(plot_77_groups)
+
+# Age Distribution 
+plot_77_age <- metadata_df_77_sub |>
+  ggplot(aes(x = age)) +
+  geom_density(fill = "lightcoral", alpha = 0.7) +
+  geom_vline(aes(xintercept = mean(age, na.rm = TRUE)), 
+             linetype = "dashed", color = "blue") +
+  labs(
+    title = "Age Distribution (Muscle sample)",
+    x = "Age",
+    y = "Density"
+  ) +
+  theme_minimal()
+
+print(plot_77_age)
+```
+
+```{r}
+summarize_data <- function(counts_df, metadata_df, dataset_name) {
+  
+  num_genes <- nrow(counts_df)
+  num_samples <- ncol(counts_df)
+  
+  # Extract unique groups/conditions
+  conditions <- unique(metadata_df$groups)
+  
+  # Use stringr to combine conditions into a single string
+  conditions_str <- str_c(conditions, collapse = " / ")
+  
+  # Create a data frame for the summary
+  data.frame(
+    Dataset = dataset_name,
+    `Number of Genes` = num_genes,
+    `Number of Samples` = num_samples,
+    Conditions = conditions_str,
+    check.names = FALSE
+  )
+}
+
+# Generate summaries
+summary_08 <- summarize_data(
+  counts_df = gene_count_08, 
+  metadata_df = metadata_df_08, 
+  dataset_name = "GSE106608 (Brain sample)"
+)
+
+summary_77_sub <- summarize_data(
+  counts_df = gene_count_77_sub, 
+  metadata_df = metadata_df_77_sub, 
+  dataset_name = "GSE128177 (Muscle sample)"
+)
+
+# --- Combine and print the final table using Base R print ---
+summary_table <- rbind(summary_08, summary_77_sub)
+print(summary_table)
+
+```
+
+library(stringr) \# The other libraries (DEXSeq, fgsea, msigdbr) are loaded but not needed for this task.
+
+summarize_data \<- function(counts_df, metadata_df, dataset_name) {
+
+num_genes \<- nrow(counts_df) num_samples \<- ncol(counts_df)
+
+\# Extract unique groups/conditions conditions \<- unique(metadata_df\$groups)
+
+\# Use stringr to combine conditions into a single string conditions_str \<- str_c(conditions, collapse = " / ")
+
+\# Create a data frame for the summary data.frame( Dataset = dataset_name, `Number of Genes` = num_genes, `Number of Samples` = num_samples, Conditions = conditions_str, check.names = FALSE ) }
+
+# --- Generate summaries for both datasets ---
+
+summary_08 \<- summarize_data( counts_df = gene_count_08, metadata_df = metadata_df_08, dataset_name = "GSE106608" )
+
+summary_77_sub \<- summarize_data( counts_df = gene_count_77_sub, metadata_df = metadata_df_77_sub, dataset_name = "GSE128177 (Subset)" )
+
+# --- Combine and print the final table using Base R print ---
+
+summary_table \<- rbind(summary_08, summary_77_sub) print(summary_table)
+
+```{summary_77_sub <- summarize_data(}
+  counts_df = gene_count_77_sub, 
+  metadata_df = metadata_df_77_sub, 
+  dataset_name = "GSE128177 (Subset)"
+)
+
+summary_table <- bind_rows(summary_08, summary_77_sub)
+
+kable(summary_table, caption = "Summary of RNA-Seq Data Characteristics")
 ```
 
 # Questions
