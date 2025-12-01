@@ -69,7 +69,7 @@ n_sig_77
 nrow(gene_count_77)
 ```
 
-COMMENT ON THIS
+Out of 67,186 genes, 40 showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
 
 ### MA-plot
 
@@ -148,7 +148,11 @@ n_common_77 <- length(intersect(signif_77, signif_gender_77))
 n_common_77
 ```
 
-COMMENT ON THIS
+Gender looks like a modest but real co-factor.
+
+The inclusion of gender in the model led to the identification of five more differentially expressed (DE) genes (45 total vs. 40), suggesting that gender is a factor that influences the expression of these few genes and should be retained in the model to reduce noise.
+
+Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
 
 ```{r}
 saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")

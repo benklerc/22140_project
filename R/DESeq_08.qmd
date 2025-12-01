@@ -69,13 +69,32 @@ n_sig_08
 nrow(gene_count_08)
 ```
 
-Out of 67,186 genes showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
+Out of 67,186 genes, 518 showed significant differential expression between the two groups/conditions. We expect a 5% false discovery rate among the genes we call significant.
 
 ##### Correcting for gender confounder
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
 
+### MA-plot
+
+```{r}
+plotMA(res_08, ylim=c(-2,2))
+dev.off()
+
+MA_08 <- plotMA(res_08, ylim=c(-2,2))
+
+```
+
+```{r}
+ggsave("../fig/MA_08.png", plot = MA_08)
+png(filename = "../fig/MA_08.png")
+```
+
 # DESeq Condition&Gender
+
+```{r}
+metadata_df_08
+```
 
 ```{r}
 dds_gender_08 <- DESeqDataSetFromMatrix(
@@ -140,9 +159,9 @@ n_common_08
 
 Gender looks like a modest but real co-factor.
 
-Without gender in the model we get 518 DE genes; with gender we get 433, with 405 overlapping. That means gender doesn’t dominate the signal but it shifts a 30ish genes (a 6,5% reduction).
+Without gender in the model we get 518 DE genes; with gender we get 433, with 405 overlapping. That means gender doesn’t dominate the signal but it shiftsmores 0ish genes (a 6,5% reduction).
 
-Eventhough the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
+Even though the PCA does not totally agree by separating, the analysis showed that adjusting for gender helps attribute the condition effect more clearly.
 
 ```{r}
 saveRDS(res_gender_08, file = "../data/deseq2_results_08.rds")
@@ -235,6 +254,128 @@ dds_gender_08 <- DESeqDataSetFromMatrix(
 !! Wrong results so far!!
 
 TODO: Do it with res_gender_age_08
+
+## FSC
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_08 <- res_gender_08[,"stat"]
+names(myStats_08) <- rownames(res_gender_08)
+
+# Remove the ensembl version in the names
+clean_names_08 <- sub("\\.\\d+$", "", names(myStats_08))
+names(myStats_08) <- clean_names_08
+
+myStats_08 <- myStats_77[!is.na(myStats_08)]
+myStats_08 <- sort(myStats_08, decreasing = TRUE)
+```
+
+```{r}
+fg_08 <- fgseaMultilevel(pathways = BP_list, stats = myStats_08, minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_08 <- fg_08 |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_08)
+```
+
+```{r}
+fg_sig_08[1:10]
+```
+
+COMMENT ON THIS
+
+```{r}
+chosen_pathway_08 <- fg_sig_08$pathway[1]
+enrichment_08_direct <- plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct
+```
+
+```{r}
+ggsave("../fig/enrichment_08_direct.png", plot = enrichment_08_direct)
+```
+
+```{r}
+leading_08 <- fg_sig_08$leadingEdge[[1]]
+first_genes_08 <- head(leading_08, 3)
+first_genes_08
+```
+
+## FSC including age
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_08 <- res_gender_age_08[,"stat"]
+names(myStats_08) <- rownames(res_gender_age_08)
+
+# Remove the ensembl version in the names
+clean_names_08 <- sub("\\.\\d+$", "", names(myStats_08))
+names(myStats_08) <- clean_names_08
+
+myStats_08 <- myStats_08[!is.na(myStats_08)]
+myStats_08 <- sort(myStats_08, decreasing = TRUE)
+```
+
+```{r}
+fg_08 <- fgseaMultilevel(pathways = BP_list, stats = myStats_08, minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_08 <- fg_08 |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_08)
+```
+
+```{r}
+fg_sig_08[1:100, c("pathway", "padj", "NES")]
+```
+
+```{r}
+enrichment_08_direct <- plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08)
+enrichment_08_direct <- enrichment_08_direct + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct
+
+# save plot
+ggsave("../fig/enrichment_08_direct_age.png", plot = enrichment_08_direct)
+```
+
+COMMENT ON THIS
+
+## FSC as non-directional including age
+
+```{r}
+chosen_pathway_08 <- fg_sig_08$pathway[1]
+enrichment_08_direct <- plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) +ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct
+```
+
+```{r}
+stats_abs_08 <- abs(myStats_08)
+fg_nondir_08 <- fgseaMultilevel(pathways = BP_list, stats = stats_abs_08,
+minSize = 15, maxSize = 500, scoreType = "pos")
+```
+
+```{r}
+fg_nondir_08 <- fg_nondir_08[order(fg_nondir_08$padj), ]
+fg_nondir_08[1:10]
+```
+
+COMMENT ON THIS
+
+```{r}
+enrichment_08_non_direct <- plotEnrichment(BP_list[[chosen_pathway_08]], stats_abs_08)
+enrichment_08_non_direct <- enrichment_08_non_direct + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+
+enrichment_08_non_direct
+# save plot
+ggsave("../fig/enrichment_08_non_direct_age.png", plot = enrichment_08_non_direct)
+```
 
 ## FSC
 
