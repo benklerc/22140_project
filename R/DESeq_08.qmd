@@ -280,8 +280,8 @@ In the most significant pathway, discover three genes that are implicated in thi
 
 ```{r}
 chosen_pathway_08 <- fg_sig_08$pathway[1]
-plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) 
-enrichment_08_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+enrichment_08_direct <- plotEnrichment(BP_list[[chosen_pathway_08]], myStats_08) + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_08))
+
 enrichment_08_direct
 ```
 
