@@ -189,7 +189,7 @@ res_gender_age_77 <- results(dds_gender_age_77,
 
 # How many genes were significant using an alpha of 0.05?
 n_sig_gender_age_77 <- sum(res_gender_age_77$padj < 0.05, na.rm = TRUE)
-cat("number of significant genes when modelling with gender:", n_sig_gender_age_77, "\n")
+cat("number of significant genes when modelling with gender and age:", n_sig_gender_age_77, "\n")
 
 # What is the overlap between the differential analysis with and without modeling age?
 signif_gender_77 <- rownames(res_77)[!is.na(res_gender_77$padj) & res_gender_77$padj < 0.05]
@@ -307,7 +307,7 @@ nrow(fg_sig_77)
 ```
 
 ```{r}
-fg_sig_77[1:10]
+fg_sig_77[1:100, c("pathway", "padj", "NES")]
 ```
 
 ```{r}
