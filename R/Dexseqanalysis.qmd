@@ -110,7 +110,7 @@ deseq_names_08 <- sub("\\.\\d+$", "", deseq_gene_08$gene_id)
 deseq_vals_08 <- deseq_gene_08$stat
 stats_deseq_08 <- setNames(deseq_vals_08, deseq_names_08)
 stats_deseq_08 <- stats_deseq_08[!is.na(stats_deseq_08)]
-stats_deseq_08 >- sort(stats_deseq_08, decreasing = TRUE)
+stats_deseq_08 <- sort(stats_deseq_08, decreasing = TRUE)
 ```
 
 ```{r}
