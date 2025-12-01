@@ -71,6 +71,10 @@ nrow(gene_count_77)
 
 COMMENT ON THIS
 
+```{r}
+plotMA(res_77, ylim=c(-2,2))
+```
+
 # DeSeq Condition&Gender
 
 Confounders are external variables that are linked to both the independent and dependent variables in a study, distorting the true relationship between them and leading to a misleading conclusion. Let’s check if there is a gender confounder in the data
@@ -136,6 +140,10 @@ COMMENT ON THIS
 
 ```{r}
 saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")
+```
+
+```{r}
+plotMA(res_gender_77, ylim=c(-2,2))
 ```
 
 # DeSeq Condition&Gender&Age
