@@ -33,7 +33,7 @@ dds_08 <- DESeqDataSetFromMatrix(
   design = ~ groups)
 ```
 
-#### PCA plot
+### PCA plot
 
 converting counts to integer mode
 
@@ -48,7 +48,7 @@ pca_08
 
 PCA does not seem to capture healthy/parkinsons. There seem to be other factors which influence the gene expression other than the condition
 
-#### Testing for differential expression
+### Testing for differential expression
 
 ```{r}
 dds_08 <- DESeq(dds_08)
