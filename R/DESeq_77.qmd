@@ -71,8 +71,16 @@ nrow(gene_count_77)
 
 COMMENT ON THIS
 
+### MA-plot
+
 ```{r}
+ggsave("../fig/MA_77.png", plot = MA_77)
+png(filename = "../fig/MA_77.png")
 plotMA(res_77, ylim=c(-2,2))
+dev.off()
+
+plotMA(res_77, ylim=c(-2,2))
+
 ```
 
 # DeSeq Condition&Gender
@@ -142,10 +150,6 @@ COMMENT ON THIS
 saveRDS(res_gender_77, file = "../data/deseq2_results_77.rds")
 ```
 
-```{r}
-plotMA(res_gender_77, ylim=c(-2,2))
-```
-
 # DeSeq Condition&Gender&Age
 
 ```{r}
@@ -199,6 +203,18 @@ saveRDS(res_gender_age_77, file = "../data/deseq2_results_77_age.rds")
 ```
 
 Conclusion: age is not a confounder!
+
+### MA-plot
+
+```{r}
+ggsave("../fig/MA_gender_age_77.png", plot = MA_gender_age_77)
+png(filename = "../fig/MA_gender_age_77.png")
+plotMA(res_gender_age_77, ylim=c(-2,2))
+dev.off()
+
+plotMA(res_gender_age_77, ylim=c(-2,2))
+
+```
 
 # Gene-set enrichment analysis
 
@@ -259,9 +275,54 @@ first_genes_77 <- head(leading_77, 3)
 first_genes_77
 ```
 
+## FSC including age
+
+```{r}
+# Create the ranked list of gene-level statistics
+myStats_77 <- res_gender_age_77[,"stat"]
+names(myStats_77) <- rownames(res_gender_age_77)
+
+# Remove the ensembl version in the names
+clean_names_77 <- sub("\\.\\d+$", "", names(myStats_77))
+names(myStats_77) <- clean_names_77
+
+myStats_77 <- myStats_77[!is.na(myStats_77)]
+myStats_77 <- sort(myStats_77, decreasing = TRUE)
+```
+
+```{r}
+fg_77 <- fgseaMultilevel(pathways = BP_list, stats = myStats_77, minSize = 15, maxSize = 500, scoreType = "std")
+```
+
+```{r}
+fg_sig_77 <- fg_77 |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_77)
+```
+
+```{r}
+fg_sig_77[1:10]
+```
+
+```{r}
+enrichment_77_direct <- plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77)
+enrichment_77_direct <- enrichment_77_direct + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct
+
+# save plot
+ggsave("../fig/enrichment_77_direct_age.png", plot = enrichment_77_direct)
+```
+
 COMMENT ON THIS
 
-## FSC as non-directional
+## FSC as non-directional including age
+
+```{r}
+chosen_pathway_77 <- fg_sig_77$pathway[1]
+plotEnrichment(BP_list[[chosen_pathway_77]], myStats_77) +
+enrichment_77_direct <- ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+enrichment_77_direct
+```
 
 ```{r}
 stats_abs_77 <- abs(myStats_77)
@@ -275,3 +336,12 @@ fg_nondir_77[1:10]
 ```
 
 COMMENT ON THIS
+
+```{r}
+enrichment_77_non_direct <- plotEnrichment(BP_list[[chosen_pathway_77]], stats_abs_77)
+enrichment_77_non_direct <- enrichment_77_non_direct + ggplot2::labs(title = paste0("Enrichment: ", chosen_pathway_77))
+
+enrichment_77_non_direct
+# save plot
+ggsave("../fig/enrichment_77_non_direct_age.png", plot = enrichment_77_non_direct)
+```
