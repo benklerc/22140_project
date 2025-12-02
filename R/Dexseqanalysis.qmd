@@ -361,7 +361,7 @@ cmp_77 <- inner_join(de_df_77, dx_df_77, by = "pathway") %>%
 ```{r}
 # ---------------------------------------------------------------------------
 
-ggplot(cmp_77, aes(x = NES_de_77, y = NES_dx_77, color = sig_cat_77)) +
+nes_comparison_plot_77 <- ggplot(cmp_77, aes(x = NES_de_77, y = NES_dx_77, color = sig_cat_77)) +
   geom_point(alpha = 0.8) +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
@@ -371,7 +371,7 @@ ggplot(cmp_77, aes(x = NES_de_77, y = NES_dx_77, color = sig_cat_77)) +
     title = "NES comparison: DESeq2 vs DEXSeq (fgseaMultilevel) — Dataset 77"
   ) +
   theme_minimal()
-
+ggsave("../fig/nes_comparison_deseq_dex_77.png", plot = nes_comparison_plot_77)
 ```
 
 14) Spearman correlation
