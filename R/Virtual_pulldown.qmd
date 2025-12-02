@@ -1,0 +1,305 @@
+---
+title: "virtual pulldown"
+format: html
+editor: visual
+---
+
+```{r}
+#We need to set seed here
+set.seed(42)
+library(fgsea)
+library(dplyr)
+library(msigdbr)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(dplyr)
+library(ggplot2)
+library(tibble)
+library(RColorBrewer)
+
+# Load your specific data
+load(file='/home/projects/22140/exercise7_data.Rdata')
+load(file='/home/projects/22140/exercise7_ppi.Rdata')
+deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
+dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+```
+
+```{r}
+alpha <- 0.05
+ppi_genes <- unique(c(ppi$from, ppi$to))
+
+# --- Process DEXSeq (Splicing) ---
+# FIX: Select only groupID and padj to avoid "list object" error
+sig_iso <- as.data.frame(dxdResult_08[, c("groupID", "padj")]) %>%
+  filter(!is.na(padj) & padj < alpha) %>%
+  filter(groupID %in% ppi_genes)
+
+# Get Top 200 DEXSeq seeds
+top_dexseq <- sig_iso %>%
+  arrange(padj) %>%
+  distinct(groupID, .keep_all = TRUE) %>%
+  slice_head(n = 100) %>%
+  pull(groupID)
+
+# --- Process DESeq2 (Expression) ---
+sig_iso2 <- as.data.frame(deseq2Result_08) %>%
+  rownames_to_column("groupID") %>%
+  filter(!is.na(padj) & padj < alpha) %>%
+  filter(groupID %in% ppi_genes)
+
+# Get Top 200 DESeq2 seeds
+top_deseq2 <- sig_iso2 %>%
+  arrange(padj) %>%
+  distinct(groupID, .keep_all = TRUE) %>%
+  slice_head(n = 100) %>%
+  pull(groupID)
+
+# Define combined seeds
+seeds <- unique(c(top_dexseq, top_deseq2))
+
+print(paste("DEXSeq Seeds:", length(top_dexseq)))
+print(paste("DESeq2 Seeds:", length(top_deseq2)))
+print(paste("Total Unique Seeds:", length(seeds)))
+```
+
+```{r}
+# Create full graph
+g <- graph_from_data_frame(ppi, directed = FALSE)
+
+# 1. Get 1st Order Neighbors
+seed_neighbors <- ego(
+  graph = g,
+  order = 1,
+  nodes = V(g)[name %in% seeds],
+  mode = "all"
+)
+
+sub_nodes_names <- unique(unlist(lapply(seed_neighbors, as_ids)))
+
+# 2. Create Initial Subgraph
+g_sub <- induced_subgraph(g, vids = V(g)[name %in% sub_nodes_names])
+
+# 3. Define Filtering Function (Teacher's Code)
+filter_virtual_pulldown <- function(subGraph, parentGraph, cutoff = 0.2) {
+  
+  if (is.null(V(subGraph)$name) || is.null(V(parentGraph)$name))
+    stop("Graphs must have vertex 'name' attributes.")
+  
+  mode <- "all"
+  vn <- V(subGraph)$name
+  
+  # Calculate degrees
+  deg_full     <- degree(parentGraph, v = vn, mode = mode)
+  deg_internal <- degree(subGraph, mode = mode)
+  
+  res <- data.frame(
+    node = vn,
+    deg_internal = deg_internal,
+    deg_full = deg_full,
+    frac_internal = ifelse(deg_full > 0, deg_internal / deg_full, NA_real_),
+    stringsAsFactors = FALSE
+  )
+  
+  # Keep nodes that pass cutoff
+  nodes_to_keep <- res$node[!is.na(res$frac_internal) &
+                              res$frac_internal >= cutoff]
+  
+  filteredSubGraph <- induced_subgraph(
+    subGraph,
+    vids = V(subGraph)[name %in% nodes_to_keep]
+  )
+  
+  # Store the fraction as an attribute
+  V(filteredSubGraph)$frac_internal <-
+    res$frac_internal[match(V(filteredSubGraph)$name, res$node)]
+  
+  return(filteredSubGraph)
+}
+
+# 4. Apply Filter (Using cutoff 0.2)
+g_filt <- filter_virtual_pulldown(g_sub, g, cutoff = 0.2)
+```
+
+```{r}
+# Run Clustering
+cl <- cluster_louvain(g_filt, weights = NULL, resolution = 0.5)
+V(g_filt)$cluster <- factor(membership(cl))
+
+# Create a dataframe of clusters for enrichment later
+clusters_df <- data.frame(
+  gene_id = V(g_filt)$name,
+  cluster = as.integer(V(g_filt)$cluster),
+  stringsAsFactors = FALSE
+)
+
+# Annotate Node Types (for plotting)
+get_type <- function(name, dex, deseq) {
+  is_dex <- name %in% dex
+  is_deseq <- name %in% deseq
+  if (is_dex & is_deseq) return("Both Seeds")
+  if (is_dex) return("DEXSeq Seed")
+  if (is_deseq) return("DESeq2 Seed")
+  return("Neighbor") 
+}
+
+V(g_filt)$node_type <- sapply(V(g_filt)$name, get_type, 
+                              dex = top_dexseq, 
+                              deseq = top_deseq2)
+
+V(g_filt)$degree <- degree(g_filt)
+```
+
+```{r}
+# 1. Define inputs
+sig_genes_dex <- unique(sig_iso$groupID)   # All significant DEXSeq genes
+sig_genes_de  <- unique(sig_iso2$groupID)  # All significant DESeq2 genes
+universe      <- clusters_df$gene_id       # Background: All genes in the network
+
+# 2. Define Enrichment Function
+enrich_method <- function(sig_set, clusters_df, min_size = 10) {
+  
+  res <- lapply(sort(unique(clusters_df$cluster)), function(k) {
+    genes_cl <- clusters_df$gene_id[clusters_df$cluster == k]
+    if (length(genes_cl) < min_size) return(NULL)
+    
+    other <- setdiff(universe, genes_cl)
+    
+    a <- sum(genes_cl %in% sig_set)
+    b <- length(genes_cl) - a
+    c <- sum(other %in% sig_set)
+    d <- length(other) - c
+    
+    ft <- fisher.test(matrix(c(a,b,c,d), nrow = 2), alternative = "greater")
+    
+    data.frame(
+      cluster = k,
+      size = length(genes_cl),
+      a = a, b = b, c = c, d = d,
+      pval = ft$p.value, odds = unname(ft$estimate)
+    )
+  })
+  
+  res <- bind_rows(res)
+  if (nrow(res)) res <- mutate(res, padj = p.adjust(pval, method = "BH"))
+  res
+}
+
+# 3. Run for both methods
+res_dx <- enrich_method(sig_genes_dex, clusters_df) %>% mutate(method = "DEXSeq")
+res_de <- enrich_method(sig_genes_de, clusters_df)  %>% mutate(method = "DESeq2")
+
+# 4. Combine
+enrich_all <- bind_rows(res_dx, res_de)
+```
+
+```{r}
+res_dx
+```
+
+```{r}
+res_de
+```
+
+```{r}
+# Filter for clean plotting (Optional: remove non-significant bubbles?)
+plot_df <- enrich_all %>%
+  mutate(mlog10_padj = -log10(padj))
+
+ggplot(plot_df, aes(x = method, y = factor(cluster))) +
+  geom_point(aes(size = odds, fill = mlog10_padj),
+             shape = 21, alpha = 0.9) +
+  
+  scale_size_area(name = "Odds Ratio", max_size = 10) +
+  scale_fill_gradient(low = "blue", high = "red", name = "-log10(FDR)") +
+  
+  theme_minimal() +
+  labs(title = "Cluster Enrichment Comparison",
+       subtitle = "Which clusters are driven by Splicing (DEX) vs Expression (DE)?",
+       x = NULL, y = "Cluster ID")
+```
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+# We look for the cluster with the lowest p-value for DESeq2 enrichment
+best_de_row <- enrich_all %>%
+  filter(method == "DESeq2") %>%
+  arrange(pval) %>%
+  slice(1)
+
+print(paste("Most significant DESeq2 Cluster:", best_de_row$cluster))
+
+# Extract genes belonging to this cluster
+genes_de_cluster <- clusters_df %>%
+  filter(cluster == best_de_row$cluster) %>%
+  pull(gene_id)
+
+# Universe is defined in the previous step (all genes in the graph)
+gsea_de <- fora(pathways = BP_list, 
+                genes = genes_de_cluster, 
+                universe = universe)
+
+# Show Top 10 Pathways for the DESeq2 Cluster
+top_de_pathways <- gsea_de %>%
+  arrange(padj) %>%
+  head(10) %>%
+  select(pathway, padj, overlap, size)
+
+print("Top Biological Processes for the DESeq2-dominated Cluster:")
+print(top_de_pathways)
+
+
+# We look for the cluster with the lowest p-value for DEXSeq enrichment
+best_dx_row <- enrich_all %>%
+  filter(method == "DEXSeq") %>%
+  arrange(pval) %>%
+  slice(1)
+
+print(paste("Most significant DEXSeq Cluster:", best_dx_row$cluster))
+
+# Extract genes belonging to this cluster
+genes_dx_cluster <- clusters_df %>%
+  filter(cluster == best_dx_row$cluster) %>%
+  pull(gene_id)
+
+# Run Over-representation Analysis (ORA)
+gsea_dx <- fora(pathways = BP_list, 
+                genes = genes_dx_cluster, 
+                universe = universe)
+
+# Show Top 10 Pathways for the DEXSeq Cluster
+top_dx_pathways <- gsea_dx %>%
+  arrange(padj) %>%
+  head(10) %>%
+  select(pathway, padj, overlap, size)
+
+print("Top Biological Processes for the DEXSeq-dominated Cluster:")
+print(top_dx_pathways)
+```
+
+```{r}
+library(VennDiagram)
+library(grid)
+```
+
+```{r}
+# 2. Create the Venn Diagram
+grid.newpage()
+venn.sets <- draw.pairwise.venn(
+  area1 = length(unique(sig_genes_de)),
+  area2 = length(unique(sig_genes_dex)),
+  cross.area = length(intersect(unique(sig_genes_de), unique(sig_genes_dex))),
+  category = c("DESeq2", "DEXSeq"),
+  fill = c("#B6E3B6", "#D4B6E3"),
+  alpha = 0.6,
+  lty = "blank",       # Removes the border lines for a cleaner look
+  cex = 1.2,           # Size of the numbers inside
+  cat.cex = 1.2,       # Size of the category labels
+  cat.pos = c(-10, 10) # Position of the category labels (in degrees)
+)
+
+# 3. Draw it
+grid.draw(venn.sets)
+
+```
