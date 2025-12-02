@@ -87,6 +87,10 @@ contig_tab_08
 
 ```
 
+```{r}
+c(sum(deseq_gene_08$deseq_sig_08), sum(dex_gene_08$dex_sig_08), sum(both_08$dex_sig_08), sum(both_08$deseq_sig_08))
+```
+
 ### fisher test for the 08 testset
 
 ```{r}
@@ -238,9 +242,7 @@ both_77 <- dex_gene_77 %>%
     by = "gene_id"
   )
 
-# ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-
+sum(both_77$deseq_sig_77)
 
 ```
 
