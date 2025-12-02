@@ -168,7 +168,7 @@ mutate(sig_cat_08 = factor(sig_cat_08, levels = c("Both","DESeq2 only","DEXSeqon
 
 ```{r}
 # Scatter + smooth
-ggplot(cmp_08, aes(x = NES_de_08, y = NES_dx_08, color = sig_cat_08)) +
+nes_comparison_plot_08 <- ggplot(cmp_08, aes(x = NES_de_08, y = NES_dx_08, color = sig_cat_08)) +
 geom_point(alpha = 0.8) +
 geom_smooth(method = "lm", se = FALSE) +
 labs(
@@ -178,6 +178,8 @@ color = "Significance",
 title = "NES comparison: DESeq2 vs DEXSeq (fgseaMultilevel)"
 ) +
 theme_minimal()
+# save plot
+ggsave("../fig/nes_comparison_deseq_dex_08.png", plot = nes_comparison_plot_08)
 ```
 
 **Spearman correlation**
