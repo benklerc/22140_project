@@ -151,97 +151,90 @@ df_dexseq_77_sub <- as.data.frame(dxdResult_77_sub)
 # Distributions
 
 ```{r}
-### Dataset 08: GSE106608 (Brain sample) Metadata ###
+# ==============================================================================
+#                  Dataset 08: GSE106608 (Brain sample) Metadata
+# ==============================================================================
 
-# Gender Distribution (Bar Plot)
-plot_08_gender <- metadata_df_08 |>
-  ggplot(aes(x = gender, fill = gender)) +
-  geom_bar() +
+# Gender Distribution by Group (Bar Plot)
+plot_08_gender_by_group <- metadata_df_08 |>
+  ggplot(aes(x = gender, fill = groups)) +
+  geom_bar(position = "dodge") +
   labs(
-    title = "Gender Distribution (brain sample)",
+    title = "Gender Distribution by Group (Brain sample)",
     x = "Gender",
-    y = "Count"
+    y = "Count",
+    fill = "Group"
   ) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set1")
 
-print(plot_08_gender)
+print(plot_08_gender_by_group)
 
-# Groups Distribution (Bar Plot)
-plot_08_groups <- metadata_df_08 |>
-  ggplot(aes(x = groups, fill = groups)) +
-  geom_bar() +
+
+# Age Distribution by Group (Density Plot)
+plot_08_age_by_group <- metadata_df_08 |>
+  ggplot(aes(x = age, fill = groups)) +
+  geom_density(alpha = 0.5) + # alpha=0.5 allows overlapping curves to be visible
   labs(
-    title = "Group Distribution (brain sample)",
-    x = "Group",
-    y = "Count"
+    title = "Age Distribution by Group (Brain sample)",
+    x = "Age",
+    y = "Density",
+    fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2")
+  scale_fill_brewer(palette = "Set2") +
+  # === FIX: Manually set x-axis limits for padding ===
+  # Assuming age ranges from ~20 to ~90, we add padding (e.g., 5 units)
+  scale_x_continuous(limits = c(min(metadata_df_08$age, na.rm = TRUE) - 10, 
+                                max(metadata_df_08$age, na.rm = TRUE) + 10))
 
-print(plot_08_groups)
+print(plot_08_age_by_group)
 
-# Age Distribution (Density Plot)
-plot_08_age <- metadata_df_08 |>
-  ggplot(aes(x = age)) +
-  geom_density(fill = "lightblue", alpha = 0.7) +
-  geom_vline(aes(xintercept = mean(age, na.rm = TRUE)), 
-             linetype = "dashed", color = "red") +
+# ==============================================================================
+#        Dataset 77: GSE128177 (Muscle sample) Subset Metadata 
+# ==============================================================================
+
+# Gender Distribution by Group (Bar Plot)
+plot_77_gender_by_group <- metadata_df_77_sub |>
+  ggplot(aes(x = gender, fill = groups)) +
+  geom_bar(position = "dodge") +
   labs(
-    title = "Age Distribution (Brain sample)",
-    x = "Age",
-    y = "Density"
-  ) +
-  theme_minimal()
-
-print(plot_08_age)
-
-
-### Dataset 77: GSE128177 (Muscle sample) Subset Metadata ###
-
-# We use metadata_df_77_sub as defined in your setup code
-# Gender Distribution (Bar Plot)
-plot_77_gender <- metadata_df_77_sub |>
-  ggplot(aes(x = gender, fill = gender)) +
-  geom_bar() +
-  labs(
-    title = "Gender Distribution (Muscle sample)",
+    title = "Gender Distribution by Group (Muscle sample)",
     x = "Gender",
-    y = "Count"
+    y = "Count",
+    fill = "Group"
   ) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set1")
 
-print(plot_77_gender)
+print(plot_77_gender_by_group)
 
-# Groups Distribution (Bar Plot)
-plot_77_groups <- metadata_df_77_sub |>
-  ggplot(aes(x = groups, fill = groups)) +
-  geom_bar() +
+
+# Age Distribution by Group (Density Plot)
+plot_77_age_by_group <- metadata_df_77_sub |>
+  ggplot(aes(x = age, fill = groups)) +
+  geom_density(alpha = 0.5) + # alpha=0.5 allows overlapping curves to be visible
   labs(
-    title = "Group Distribution (Muscle sample)",
-    x = "Group",
-    y = "Count"
+    title = "Age Distribution by Group (Muscle sample)",
+    x = "Age",
+    y = "Density",
+    fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2")
+  scale_fill_brewer(palette = "Set2") +
+  # === FIX: Manually set x-axis limits for padding ===
+  scale_x_continuous(limits = c(min(metadata_df_77_sub$age, na.rm = TRUE) - 10, 
+                                max(metadata_df_77_sub$age, na.rm = TRUE) + 10))
 
-print(plot_77_groups)
+print(plot_77_age_by_group)
 
-# Age Distribution 
-plot_77_age <- metadata_df_77_sub |>
-  ggplot(aes(x = age)) +
-  geom_density(fill = "lightcoral", alpha = 0.7) +
-  geom_vline(aes(xintercept = mean(age, na.rm = TRUE)), 
-             linetype = "dashed", color = "blue") +
-  labs(
-    title = "Age Distribution (Muscle sample)",
-    x = "Age",
-    y = "Density"
-  ) +
-  theme_minimal()
+# Save 08 plots
+ggsave("../fig/08_gender_by_group.png", plot = plot_08_gender_by_group)
+ggsave("../fig/08_age_by_group.png", plot = plot_08_age_by_group)
 
-print(plot_77_age)
+# Save 77 plots
+ggsave("../fig/77_gender_by_group.png", plot = plot_77_gender_by_group)
+ggsave("../fig/77_age_by_group.png", plot = plot_77_age_by_group)
 ```
 
 ```{r}
