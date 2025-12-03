@@ -63,6 +63,8 @@ print(paste("DESeq2 Seeds:", length(top_deseq2)))
 print(paste("Total Unique Seeds:", length(seeds)))
 ```
 
+**This means that the Dexseq and Deseq2 only share 1 of their top 100 significant genes???**
+
 ```{r}
 # Create full graph
 g <- graph_from_data_frame(ppi, directed = FALSE)
