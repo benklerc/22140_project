@@ -249,6 +249,9 @@ dds_gender_08 <- DESeqDataSetFromMatrix(
   design = ~ gender + age)
 ```
 
+```{r}
+```
+
 # Gene-set enrichment analysis
 
 !! Wrong results so far!!

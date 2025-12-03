@@ -173,8 +173,51 @@ dds_gender_age_77_sub <- DESeq(dds_gender_age_77_sub)
 ```
 
 ```{r}
+dds_gender_age_77_sub
+```
+
+```{r}
 pca_gender_age_77_sub <- plotPCA(rlog(dds_gender_age_77_sub), intgroup=c("groups","age"))
 pca_gender_age_77_sub
+```
+
+```{r}
+library(dplyr)
+# Extract assay values (rlog counts)
+rlog_mat <- assay(dds_gender_age_77_sub)
+
+# Remove constant/zero-variance genes
+rlog_mat <- rlog_mat[apply(rlog_mat, 1, var) != 0, ]
+
+# Transpose for PCA (samples must be rows)
+pca <- prcomp(t(rlog_mat), scale. = TRUE)
+
+# Extract percentage of variance
+pca_var <- (pca$sdev^2 / sum(pca$sdev^2)) * 100
+
+
+# Prepare metadata for joining
+metadata <- as.data.frame(colData(dds_gender_age_77_sub))
+metadata$sample <- rownames(metadata)
+
+# Build PCA dataframe
+pca_df <- as.data.frame(pca$x) %>%
+  mutate(sample = rownames(.)) %>%
+  left_join(metadata, by = "sample")
+
+# ---------------------------------------
+# Plotting: continuous variable as color
+# Example here assumes "age" exists in colData
+# ---------------------------------------
+
+ggplot(pca_df, aes(PC1, PC2, colour = age)) +
+  geom_point(size = 4, alpha = 0.8) +
+  scale_colour_gradient(low = "blue", high = "red") +   # continuous colour scale
+  labs(title = "PCA of rlog-normalized RNA-seq data",
+       x = paste0("PC1 (", round(pca_var[1], 2), "% variance)"),
+       y = paste0("PC2 (", round(pca_var[2], 2), "% variance)"),
+       colour = "Age") +
+  theme_minimal(base_size = 14)
 ```
 
 Save the plot
@@ -201,7 +244,10 @@ signif_gender_age_77_sub <- rownames(res_gender_age_77_sub)[!is.na(res_gender_ag
 
 # Number of genes in common
 n_common_77_sub <- length(intersect(signif_gender_77_sub, signif_gender_age_77_sub))
-cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_77_sub)
+cat("number of overlapping significant genes when modelling with gender and age, and just gender: ",n_common_77_sub,  "\n")
+
+n_common_77_sub <- length(intersect(signif_77_sub, signif_gender_age_77_sub))
+cat("number of overlapping significant genes when modelling with gender and age, and just condition: ",n_common_77_sub)
 ```
 
 Save the results
