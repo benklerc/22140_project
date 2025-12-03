@@ -105,7 +105,7 @@ metadata_df_77 <- metadata_df_77 |>
     patient_type = str_extract(characteristics, "(?<=group: )[^,]+$")
   )
 
-head(metadata_df_77)
+print(metadata_df_77)
 ```
 
 ### Subset 77 data
@@ -188,7 +188,7 @@ plot_08_age <- metadata_df_08 |>
   geom_vline(aes(xintercept = mean(age, na.rm = TRUE)), 
              linetype = "dashed", color = "red") +
   labs(
-    title = "Age Distribution (brain sample)",
+    title = "Age Distribution (Brain sample)",
     x = "Age",
     y = "Density"
   ) +
