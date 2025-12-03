@@ -370,7 +370,7 @@ nes_comparison_plot_77 <- ggplot(cmp_77, aes(x = NES_de_77, y = NES_dx_77, color
     x = "NES (DESeq2 fgsea)",
     y = "NES (DEXSeq fgsea)",
     color = "Significance",
-    title = "NES comparison: DESeq2 vs DEXSeq (fgseaMultilevel) — Dataset 77"
+    title = "NES comparison: DESeq2 vs DEXSeq"
   ) +
   theme_minimal()
 ggsave("../fig/nes_comparison_deseq_dex_77.png", plot = nes_comparison_plot_77)
