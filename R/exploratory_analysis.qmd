@@ -166,7 +166,13 @@ plot_08_gender_by_group <- metadata_df_08 |>
     fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set1")
+  scale_fill_manual(
+    values = c(
+      "healthy" = "skyblue",       # Your desired teal/mint
+      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+    )
+  )
+
 
 print(plot_08_gender_by_group)
 
@@ -182,7 +188,12 @@ plot_08_age_by_group <- metadata_df_08 |>
     fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2") +
+    scale_fill_manual(
+    values = c(
+      "healthy" = "skyblue",       # Your desired teal/mint
+      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+    )
+  ) +
   # === FIX: Manually set x-axis limits for padding ===
   # Assuming age ranges from ~20 to ~90, we add padding (e.g., 5 units)
   scale_x_continuous(limits = c(min(metadata_df_08$age, na.rm = TRUE) - 10, 
@@ -205,7 +216,12 @@ plot_77_gender_by_group <- metadata_df_77_sub |>
     fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set1")
+    scale_fill_manual(
+    values = c(
+      "healthy" = "skyblue",       # Your desired teal/mint
+      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+    )
+  )
 
 print(plot_77_gender_by_group)
 
@@ -221,7 +237,12 @@ plot_77_age_by_group <- metadata_df_77_sub |>
     fill = "Group"
   ) +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2") +
+    scale_fill_manual(
+    values = c(
+      "healthy" = "skyblue",       # Your desired teal/mint
+      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+    )
+  ) +
   # === FIX: Manually set x-axis limits for padding ===
   scale_x_continuous(limits = c(min(metadata_df_77_sub$age, na.rm = TRUE) - 10, 
                                 max(metadata_df_77_sub$age, na.rm = TRUE) + 10))
@@ -235,6 +256,11 @@ ggsave("../fig/08_age_by_group.png", plot = plot_08_age_by_group)
 # Save 77 plots
 ggsave("../fig/77_gender_by_group.png", plot = plot_77_gender_by_group)
 ggsave("../fig/77_age_by_group.png", plot = plot_77_age_by_group)
+```
+
+```{r}
+teal_color <- RColorBrewer::brewer.pal(3, "Set2")[1]
+print(teal_color)
 ```
 
 ```{r}
@@ -282,39 +308,6 @@ summary_77_sub <- summarize_data(
 summary_table <- rbind(summary_08, summary_77_sub)
 print(summary_table)
 
-```
-
-library(stringr) \# The other libraries (DEXSeq, fgsea, msigdbr) are loaded but not needed for this task.
-
-summarize_data \<- function(counts_df, metadata_df, dataset_name) {
-
-num_genes \<- nrow(counts_df) num_samples \<- ncol(counts_df)
-
-\# Extract unique groups/conditions conditions \<- unique(metadata_df\$groups)
-
-\# Use stringr to combine conditions into a single string conditions_str \<- str_c(conditions, collapse = " / ")
-
-\# Create a data frame for the summary data.frame( Dataset = dataset_name, `Number of Genes` = num_genes, `Number of Samples` = num_samples, Conditions = conditions_str, check.names = FALSE ) }
-
-# --- Generate summaries for both datasets ---
-
-summary_08 \<- summarize_data( counts_df = gene_count_08, metadata_df = metadata_df_08, dataset_name = "GSE106608" )
-
-summary_77_sub \<- summarize_data( counts_df = gene_count_77_sub, metadata_df = metadata_df_77_sub, dataset_name = "GSE128177 (Subset)" )
-
-# --- Combine and print the final table using Base R print ---
-
-summary_table \<- rbind(summary_08, summary_77_sub) print(summary_table)
-
-```{summary_77_sub <- summarize_data(}
-  counts_df = gene_count_77_sub, 
-  metadata_df = metadata_df_77_sub, 
-  dataset_name = "GSE128177 (Subset)"
-)
-
-summary_table <- bind_rows(summary_08, summary_77_sub)
-
-kable(summary_table, caption = "Summary of RNA-Seq Data Characteristics")
 ```
 
 # Questions
