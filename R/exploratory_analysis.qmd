@@ -134,10 +134,10 @@ dim(isoform_count_77_sub)
 ```
 
 ```{r}
-res_gender_age_08 <- readRDS('../data/deseq2_results_08_age')
+res_gender_age_08 <- readRDS('../data/deseq2_results_08_age.rds')
 res_gender_age_77 <- readRDS('../data/deseq2_results_77_age_sub.rds') 
 dxdResult_08 <- readRDS('../data/dexseq_results_08_age.rds') 
-dxdResult_77 <- readRDS('../data/dexseq_results_77_age_sub.rds')
+dxdResult_77 <- readRDS('../data/dexseq_results_77_sub.rds')
 ```
 
 ```{r}
