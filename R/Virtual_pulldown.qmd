@@ -23,6 +23,7 @@ load(file='/home/projects/22140/exercise7_data.Rdata')
 load(file='/home/projects/22140/exercise7_ppi.Rdata')
 deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
 dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+integrated_08 <- readRDS("../data/integrated_08.rds")
 ```
 
 ```{r}
