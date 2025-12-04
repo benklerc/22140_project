@@ -7,8 +7,8 @@ format: html
 
 ```{r}
 #converting to dataframe
-dxdResult_08_df <- as.data.frame(dxdResult_08)
-dxdResult_77_df <- as.data.frame(dxdResult_77)
+dxdResult_08_df <- readRDS("../data/dexseq_results_08_age.rds")
+dxdResult_77_df <- readRDS("../data/dexseq_results_77_age_sub.rds")
 
 #ordering them:
 dxdResult_08_df <- dxdResult_08_df[order(dxdResult_08_df$padj),]
@@ -18,8 +18,8 @@ dxdResult_77_df <- dxdResult_77_df[order(dxdResult_77_df$padj),]
 
 ```{r}
 #making the deseq into dataframes
-deseq_08_df <- as.data.frame(res_gender_age_08)
-deseq_77_df <- as.data.frame(res_gender_age_77)
+deseq_08_df <- as.data.frame(readRDS("../data/deseq2_results_08_age.rds"))
+deseq_77_df <- as.data.frame(readRDS("../data/deseq2_results_77_age_sub.rds"))
 deseq_08_df$gene_id <- rownames(deseq_08_df)
 deseq_77_df$gene_id <- rownames(deseq_77_df)
 ```
@@ -31,7 +31,6 @@ deseq_77_df$gene_id <- rownames(deseq_77_df)
 ```{r}
 dexseq_to_genelevel <- function(x) {
   x %>%
-    as.data.frame() %>%
     as_tibble() %>%
     # Remove rows with NULL or NA 'stat'
     filter(!is.na(stat)) %>%
@@ -61,7 +60,7 @@ dexseq_to_genelevel <- function(x) {
 ```{r}
 # dexseq per-gene q-values
 alpha <- 0.05
-dex_gene_08 <- dexseq_to_genelevel(dxdResult_08)
+dex_gene_08 <- dexseq_to_genelevel(dxdResult_08_df)
 
 dex_gene_08 <- dex_gene_08 %>%
   mutate(gene_id, dex_padj_08 = padj,
@@ -202,7 +201,7 @@ alpha <- 0.05
 # 1) Convert DEXSeq to gene-level statistics
 # ---------------------------------------------------------------------------
 
-dex_gene_77 <- dexseq_to_genelevel(dxdResult_77)
+dex_gene_77 <- dexseq_to_genelevel(dxdResult_77_df)
 
 dex_gene_77 <- dex_gene_77 %>%
   mutate(
