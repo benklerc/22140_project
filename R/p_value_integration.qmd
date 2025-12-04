@@ -15,15 +15,12 @@ library(msigdbr)
 set.seed(42)
 ```
 
-# Data wrangling
-
-Joined(inner) dataset with p values from both datsets(08, 77) and both analysis(DeSeq2, DEXSeq)
+# Data Loading
 
 ```{r}
-
 res_gender_age_08 <- readRDS("../data/deseq2_results_08_age.rds")
 dxdResult_08 <- readRDS("../data/dexseq_results_08_age.rds")
-dxdResult_77 <- readRDS("../data/dexseq_results_77_age.rds")
+dxdResult_77 <- readRDS("../data/dexseq_results_77_age_sub.rds")
 res_gender_age_77 <- readRDS("../data/deseq2_results_77_age.rds")
 ```
 
@@ -57,6 +54,8 @@ dim(diff_transcript_expr_77)
 dim(diff_gene_expr_77)
 ```
 
+# (Joining all Datasets at once)
+
 ```{r}
 full_diff_analysis <- diff_gene_expr_08 %>% 
   inner_join(diff_gene_expr_77, by = 'Genes') %>% 
@@ -66,8 +65,6 @@ full_diff_analysis <- diff_gene_expr_08 %>%
 full_diff_analysis
 ```
 
-# Fishers Method
-
 ```{r}
 full_diff_analysis <- full_diff_analysis |>
   rowwise() |>
@@ -76,7 +73,7 @@ full_diff_analysis <- full_diff_analysis |>
   ungroup()
 ```
 
-# Multiple Testing adjustment
+## Multiple Testing adjustment
 
 ```{r}
 full_diff_analysis <- full_diff_analysis %>% 
@@ -114,7 +111,7 @@ unique_joint
 
 ```
 
-# Integration within Levels
+# (Integration within Levels)
 
 ## Transcripts(Edingtons)
 
@@ -131,7 +128,8 @@ dim(gene_diff_analysis)
 gene_diff_analysis <- gene_diff_analysis |>
   rowwise() |>
   mutate(
-  joint_pval_fisher = metap::sump(c(deseq_08_pval, deseq_77_pval))$p  ) |>
+  joint_pval_fisher_gene = metap::sump(c(deseq_08_pval, deseq_77_pval))$p ,
+  adj_pval = p.adjust(joint_pval_fisher_gene)) |>
   ungroup()
 ```
 
@@ -148,18 +146,28 @@ dim(isoform_diff_analysis)
 isoform_diff_analysis <- isoform_diff_analysis |>
   rowwise() |>
   mutate(
-  joint_pval_fisher = metap::sumlog(c( dexseq_08_pval, dexseq_77_pval))$p  ) |>
+  joint_pval_fisher_iso = metap::sump(c( dexseq_08_pval, dexseq_77_pval))$p  ) |>
   ungroup()
 ```
 
 ## Joining Isoform and Gene counts(fishers)
 
 ```{r}
-isoform_diff_analysis <- isoform_diff_analysis |>
+full_diff_analysis_2 <- isoform_diff_analysis %>% 
+  dplyr::select(Genes, joint_pval_fisher_iso) %>% 
+  dplyr::inner_join(gene_diff_analysis %>% dplyr::select(Genes, joint_pval_fisher_gene), by='Genes')
+  
+full_diff_analysis_2 <- full_diff_analysis_2 |>
   rowwise() |>
   mutate(
-  joint_pval_fisher = metap::sumlog(c( dexseq_08_pval, dexseq_77_pval))$p  ) |>
+  joint_pval_fisher = metap::sumlog(c( joint_pval_fisher_iso, joint_pval_fisher_gene))$p,
+  adj_pval = p.adjust(joint_pval_fisher)
+  ) |>
   ungroup()
+```
+
+```{r}
+full_diff_analysis_2 %>% filter(adj_pval <0.05) %>% nrow()
 ```
 
 # Joining Datasets first
@@ -186,7 +194,7 @@ int_diff_analysis_08 <- diff_analysis_08 |>
 
 ```{r}
 int_diff_analysis_08 %>% 
-  filter(adj_joint_pval<0.05)
+  filter(adj_joint_pval<0.05) %>% nrow()
 ```
 
 ### 77
@@ -208,7 +216,7 @@ int_diff_analysis_77 <- diff_analysis_77 |>
 ```
 
 ```{r}
-int_diff_analysis_77 %>% filter(adj_joint_pval <0.05)
+int_diff_analysis_77 %>% filter(adj_joint_pval <0.05) %>% nrow()
 ```
 
 ## Across Datasets(edingtons)
@@ -222,11 +230,12 @@ full_diff_analysis <- int_diff_analysis_08 %>%
 
 ```{r}
 full_diff_analysis <- full_diff_analysis %>%
+  na.omit() %>% 
   rowwise() %>%
   mutate(
-  joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p,
-  adj_joint_pval = p.adjust(joint_pval_edingtons, method = 'BH')) |>
-
+  joint_pval_edingtons = metap::sump(c(joint_pval_fisher_08, joint_pval_fisher_77))$p,
+  adj_joint_pval = p.adjust(joint_pval_edingtons, method = 'BH')
+  ) |>
   ungroup()
 
 # full_diff_analysis <- full_diff_analysis |>
@@ -237,7 +246,7 @@ full_diff_analysis <- full_diff_analysis %>%
 ```
 
 ```{r}
-full_diff_analysis %>% filter(adj_joint_pval<0.05)
+full_diff_analysis %>% filter(adj_joint_pval<0.05) %>% nrow()
 ```
 
 ## Save Object for further Analysis
@@ -250,7 +259,7 @@ saveRDS(int_diff_analysis_77_joint, file = "../data/integrated_77.rds")
 saveRDS(int_diff_analysis_08_joint, file = "../data/integrated_08.rds")
 ```
 
-# GSEA
+# GSEA(full)
 
 ```{r}
 library(fgsea)
@@ -271,7 +280,76 @@ int_stats <- sort(int_stats, decreasing = TRUE)
 
 fg_integrated <- fgseaMultilevel(pathways = BP_list, stats = int_stats, minSize = 15, maxSize = 500, scoreType = "std")
 
-fg_sig_integrated <- fg_integrated |> arrange(padj) |> filter(padj < 0.05)
+fg_integrated |> arrange(padj) |> filter(padj < 0.05) %>% nrow()
+fg_integrated |> arrange(pval) |> filter(pval < 0.05) %>% head(n = 10)
 
-nrow(fg_sig_integrated)
+```
+
+# GSEA(08)
+
+```{r}
+int_stats_08 <- int_diff_analysis_08$adj_joint_pval
+names(int_stats_08) <- int_diff_analysis_08$Genes
+
+int_stats_08 <- int_stats_08[!is.na(int_stats_08)]
+int_stats_08 <- sort(int_stats_08, decreasing = TRUE)
+
+fg_integrated_08 <- fgseaMultilevel(pathways = BP_list, stats = int_stats_08, minSize = 15, maxSize = 500, scoreType = "std")
+
+fg_integrated_08 |> arrange(padj) |> filter(padj < 0.05) %>% nrow()
+fg_integrated_08 |> arrange(pval) |> filter(pval < 0.05) %>% head(n=10)
+```
+
+# GSEA 77
+
+```{r}
+int_stats_77 <- int_diff_analysis_77$adj_joint_pval
+names(int_stats_77) <- int_diff_analysis_77$Genes
+
+int_stats_77 <- int_stats_77[!is.na(int_stats_77)]
+int_stats_77 <- sort(int_stats_77, decreasing = TRUE)
+
+fg_integrated_77 <- fgseaMultilevel(pathways = BP_list, stats = int_stats_77, minSize = 15, maxSize = 500, scoreType = "std")
+
+fg_integrated_77 |> arrange(padj) |> filter(padj < 0.05) %>% nrow()
+fg_integrated_77 |> arrange(pval) |> filter(pval < 0.05) %>% head(n=10)
+```
+
+```{r}
+head_77<- fg_integrated_77 |> arrange(pval) |> filter(pval < 0.05) %>% head(n=100)
+head_08<- fg_integrated_08 |> arrange(pval) |> filter(pval < 0.05) %>% head(n=100)
+common_pathways <- intersect(head_08$pathway, head_77$pathway)
+common_pathways
+```
+
+# GSEA2
+
+```{r}
+full_diff_analysis_2
+
+int_stats_2 <- full_diff_analysis_2$adj_pval
+names(int_stats_2) <- full_diff_analysis_2$Genes
+
+int_stats_2 <- int_stats_2[!is.na(int_stats_2)]
+int_stats_2 <- sort(int_stats_2, decreasing = TRUE)
+
+fg_integrated_2 <- fgseaMultilevel(pathways = BP_list, stats = int_stats_2, minSize = 15, maxSize = 500, scoreType = "std")
+
+fg_integrated_2 |> arrange(padj) |> filter(padj < 0.05) %>% nrow()
+fg_integrated_2 |> arrange(pval) |> filter(pval < 0.05) %>% head(n=10)
+```
+
+## per gene
+
+```{r}
+int_stats_2_gene <- gene_diff_analysis$adj_pval
+names(int_stats_2_gene) <- gene_diff_analysis$Genes
+
+int_stats_2_gene <- int_stats_2_gene[!is.na(int_stats_2_gene)]
+int_stats_2_gene <- sort(int_stats_2_gene, decreasing = TRUE)
+
+fg_integrated_2_gene <- fgseaMultilevel(pathways = BP_list, stats = int_stats_2_gene, minSize = 15, maxSize = 500, scoreType = "std")
+
+fg_integrated_2_gene |> arrange(padj) |> filter(padj < 0.05) %>% nrow()
+fg_integrated_2_gene |> arrange(pval) |> filter(pval < 0.05) %>% head(n=10)
 ```
