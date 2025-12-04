@@ -130,10 +130,6 @@ dim(isoform_count_77_sub)
 # Load Result files
 
 ```{r}
-
-```
-
-```{r}
 res_gender_age_08 <- readRDS('../data/deseq2_results_08_age.rds')
 res_gender_age_77 <- readRDS('../data/deseq2_results_77_age_sub.rds') 
 dxdResult_08 <- readRDS('../data/dexseq_results_08_age.rds') 
@@ -172,8 +168,8 @@ plot_08_gender_by_group <- metadata_df_08 |>
   theme_minimal() +
   scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",       # Your desired teal/mint
-      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+      "healthy" = "skyblue",     
+      "parkinson's" = "#0066CC"   
     )
   )
 
