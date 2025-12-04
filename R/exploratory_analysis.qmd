@@ -298,14 +298,14 @@ summary_08 <- summarize_data(
   dataset_name = "GSE106608 (Brain sample)"
 )
 
-summary_77_sub <- summarize_data(
-  counts_df = gene_count_77_sub, 
-  metadata_df = metadata_df_77_sub, 
+summary_77 <- summarize_data(
+  counts_df = gene_count_77, 
+  metadata_df = metadata_df_77, 
   dataset_name = "GSE128177 (Muscle sample)"
 )
 
 # --- Combine and print the final table using Base R print ---
-summary_table <- rbind(summary_08, summary_77_sub)
+summary_table <- rbind(summary_08, summary_77)
 print(summary_table)
 
 ```
