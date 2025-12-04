@@ -97,13 +97,10 @@ metadata_df_77 <- metadata_df_77 |>
 metadata_df_77 <- metadata_df_77 |>
   mutate(
     age = as.integer(str_extract(characteristics, "(?<=age: )\\d+"))
-  )
+  ) |> 
+  filter(age > 45) # We only filter age for 77 dataset
 
 head(metadata_df_77)
-```
-
-```{r}
-nrow(metadata_df_77)
 ```
 
 ```{r}
@@ -199,6 +196,8 @@ Now do this for dataset 77
 ```{r}
 #| message: false
 #| warning: false
+rownames(metadata_df_77) <- metadata_df_77$sample_id
+isoform_count_77 <- isoform_count_77[, rownames(metadata_df_77), drop = FALSE]
 isoInfo_sub_77 <- isoInfo[match(rownames(isoform_count_77), isoInfo$transcript_id), ]
 
 featureID_77 <- isoInfo_sub_77$transcript_id
@@ -213,6 +212,10 @@ dxdSubset_77 <- DEXSeqDataSet(
   featureID = featureID_77,
   groupID = groupID_77
 )
+```
+
+```{r}
+isoform_count_77
 ```
 
 ```{r}
@@ -261,8 +264,8 @@ top10_genes
 ```
 
 ```{r}
-saveRDS(dxdResult_77, file = "../data/dexseq_results_77_age.rds")
-saveRDS(dxdSubset_77, file = "../data/dexseq_object_77_age.rds")
+saveRDS(dxdResult_77, file = "../data/dexseq_results_77_age_sub.rds")
+saveRDS(dxdSubset_77, file = "../data/dexseq_object_77_age_sub.rds")
 ```
 
 ```{r}

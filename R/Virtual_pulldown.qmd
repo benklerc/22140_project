@@ -23,6 +23,7 @@ load(file='/home/projects/22140/exercise7_data.Rdata')
 load(file='/home/projects/22140/exercise7_ppi.Rdata')
 deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
 dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+
 ```
 
 ```{r}
@@ -62,8 +63,6 @@ print(paste("DEXSeq Seeds:", length(top_dexseq)))
 print(paste("DESeq2 Seeds:", length(top_deseq2)))
 print(paste("Total Unique Seeds:", length(seeds)))
 ```
-
-**This means that the Dexseq and Deseq2 only share 1 of their top 100 significant genes???**
 
 ```{r}
 # Create full graph
