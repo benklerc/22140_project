@@ -177,8 +177,14 @@ dim(diff_analysis_08)
 int_diff_analysis_08 <- diff_analysis_08 |>
   rowwise() |>
   mutate(
-  joint_pval_fisher_08 = metap::sumlog(c( deseq_08_pval, dexseq_08_pval))$p  ) |>
+  joint_pval_fisher_08 = metap::sumlog(c( deseq_08_pval, dexseq_08_pval))$p,
+  adj_joint_pval = p.adjust(joint_pval_fisher_08)) |>
   ungroup()
+```
+
+```{r}
+int_diff_analysis_08 %>% 
+  filter(adj_joint_pval<0.05)
 ```
 
 ### 77
@@ -194,8 +200,13 @@ dim(diff_analysis_77)
 int_diff_analysis_77 <- diff_analysis_77 |>
   rowwise() |>
   mutate(
-  joint_pval_fisher_77 = metap::sumlog(c( deseq_77_pval, dexseq_77_pval))$p  ) |>
+  joint_pval_fisher_77 = metap::sumlog(c( deseq_77_pval, dexseq_77_pval))$p,
+  adj_joint_pval = p.adjust()) |>
   ungroup()
+```
+
+```{r}
+int_diff_analysis_77 %>% filter(joint_pval_fisher_77 <0.05)
 ```
 
 ## Across Datasets(edingtons)
@@ -211,8 +222,12 @@ full_diff_analysis <- int_diff_analysis_08 %>%
 full_diff_analysis <- full_diff_analysis |>
   rowwise() |>
   mutate(
-  joint_pval_fisher = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p  ) |>
+  joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p  ) |>
   ungroup()
+```
+
+```{r}
+full_diff_analysis %>% filter(joint_pval_edingtons<0.05)
 ```
 
 ## Save Object for further Analysis
@@ -223,4 +238,16 @@ int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, join
 
 saveRDS(int_diff_analysis_77_joint, file = "../data/integrated_77.rds")
 saveRDS(int_diff_analysis_08_joint, file = "../data/integrated_08.rds")
+```
+
+# GSEA
+
+```{r}
+library(fgsea)
+library(msigdbr)
+```
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
 ```
