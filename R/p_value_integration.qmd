@@ -203,7 +203,7 @@ int_diff_analysis_77 <- diff_analysis_77 |>
   rowwise() |>
   mutate(
   joint_pval_fisher_77 = metap::sumlog(c( deseq_77_pval, dexseq_77_pval))$p,
-  adj_joint_pval = p.adjust(joint_pval_fisher_77, method = "fdr")) |>
+  adj_joint_pval = p.adjust(joint_pval_fisher_77)) |>
   ungroup()
 ```
 
@@ -247,8 +247,8 @@ full_diff_analysis %>% filter(joint_pval_edingtons<0.05)
 ## Save Object for further Analysis
 
 ```{r}
-int_diff_analysis_77_joint <- int_diff_analysis_77 %>% dplyr::select(Genes, joint_pval_fisher_77)
-int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, joint_pval_fisher_08)
+int_diff_analysis_77_joint <- int_diff_analysis_77 %>% dplyr::select(Genes, adj_joint_pval)
+int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, adj_joint_pval)
 
 saveRDS(int_diff_analysis_77_joint, file = "../data/integrated_77.rds")
 saveRDS(int_diff_analysis_08_joint, file = "../data/integrated_08.rds")
