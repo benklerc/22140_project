@@ -168,10 +168,12 @@ plot_08_gender_by_group <- metadata_df_08 |>
   theme_minimal() +
   scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",     
-      "parkinson's" = "#0066CC"   
+      "healthy" = "skyblue",      
+      "parkinson's" = "#0066CC"    
     )
-  )
+  ) +
+  # change the labels on the x-axis
+  scale_x_discrete(labels = c("F" = "Female", "M" = "Male"))
 
 print(plot_08_gender_by_group)
 
