@@ -201,12 +201,12 @@ int_diff_analysis_77 <- diff_analysis_77 |>
   rowwise() |>
   mutate(
   joint_pval_fisher_77 = metap::sumlog(c( deseq_77_pval, dexseq_77_pval))$p,
-  adj_joint_pval = p.adjust()) |>
+  adj_joint_pval = p.adjust(joint_pval_fisher_77)) |>
   ungroup()
 ```
 
 ```{r}
-int_diff_analysis_77 %>% filter(joint_pval_fisher_77 <0.05)
+int_diff_analysis_77 %>% filter(adj_joint_pval <0.05)
 ```
 
 ## Across Datasets(edingtons)
@@ -222,19 +222,20 @@ full_diff_analysis <- int_diff_analysis_08 %>%
 full_diff_analysis <- full_diff_analysis |>
   rowwise() |>
   mutate(
-  joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p  ) |>
+  joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p,
+  adj_joint_pval = p.adjust(joint_pval_edingtons, method = 'BH')) |>
   ungroup()
 ```
 
 ```{r}
-full_diff_analysis %>% filter(joint_pval_edingtons<0.05)
+full_diff_analysis %>% filter(adj_joint_pval<0.05)
 ```
 
 ## Save Object for further Analysis
 
 ```{r}
-int_diff_analysis_77_joint <- int_diff_analysis_77 %>% dplyr::select(Genes, joint_pval_fisher_77)
-int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, joint_pval_fisher_08)
+int_diff_analysis_77_joint <- int_diff_analysis_77 %>% dplyr::select(Genes, adj_joint_pval)
+int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, adj_joint_pval)
 
 saveRDS(int_diff_analysis_77_joint, file = "../data/integrated_77.rds")
 saveRDS(int_diff_analysis_08_joint, file = "../data/integrated_08.rds")
@@ -250,4 +251,18 @@ library(msigdbr)
 ```{r}
 BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
 BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```
+
+```{r}
+int_stats <- full_diff_analysis$adj_joint_pval
+names(int_stats) <- full_diff_analysis$Genes
+
+int_stats <- int_stats[!is.na(int_stats)]
+int_stats <- sort(int_stats, decreasing = TRUE)
+
+fg_integrated <- fgseaMultilevel(pathways = BP_list, stats = int_stats, minSize = 15, maxSize = 500, scoreType = "std")
+
+fg_sig_integrated <- fg_integrated |> arrange(padj) |> filter(padj < 0.05)
+
+nrow(fg_sig_integrated)
 ```

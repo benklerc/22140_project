@@ -400,6 +400,8 @@ print(summary_table)
 
     -   assign biological function
 
+-   Do we have DeSEQ2 GSEA with the subsetted data?
+
 ```{r}
 isoform_count_08 %>% group_by()
 
