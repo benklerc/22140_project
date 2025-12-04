@@ -258,6 +258,10 @@ contig_tab_77
 
 ```
 
+```{r}
+c(sum(both_77$dex_sig_77), sum(both_77$deseq_sig_77))
+```
+
 6)  Fisher test for enrichment of overlapping significant genes
 
 ```{r}
