@@ -172,10 +172,7 @@ plot_08_gender_by_group <- metadata_df_08 |>
       "parkinson's" = "#0066CC"   
     )
   )
-
-
 print(plot_08_gender_by_group)
-
 
 # Age Distribution by Group (Density Plot)
 plot_08_age_by_group <- metadata_df_08 |>
@@ -198,9 +195,7 @@ plot_08_age_by_group <- metadata_df_08 |>
   # Assuming age ranges from ~20 to ~90, we add padding (e.g., 5 units)
   scale_x_continuous(limits = c(min(metadata_df_08$age, na.rm = TRUE) - 10, 
                                 max(metadata_df_08$age, na.rm = TRUE) + 10))
-
 print(plot_08_age_by_group)
-
 # ==============================================================================
 #        Dataset 77: GSE128177 (Muscle sample) Subset Metadata 
 # ==============================================================================
@@ -224,8 +219,6 @@ plot_77_gender_by_group <- metadata_df_77 |>
   )
 
 print(plot_77_gender_by_group)
-
-
 # Age Distribution by Group (Density Plot)
 plot_77_age_by_group <- metadata_df_77 |>
   ggplot(aes(x = age, fill = groups)) +
