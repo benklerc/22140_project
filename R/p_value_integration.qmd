@@ -20,6 +20,12 @@ set.seed(42)
 Joined(inner) dataset with p values from both datsets(08, 77) and both analysis(DeSeq2, DEXSeq)
 
 ```{r}
+
+deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
+dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+```
+
+```{r}
 diff_gene_expr_08 <- as.data.frame(res_gender_08) %>% 
   dplyr::select(pvalue) %>% 
   rownames_to_column(var = 'Genes') %>% 
@@ -104,3 +110,13 @@ unique_joint <- sum(full_diff_analysis$sig_joint &
 unique_joint
 
 ```
+
+# Integration within Transcripts(Fishers)
+
+# Gene Counts
+
+```{r}
+
+```
+
+# Isoform Counts
