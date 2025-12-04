@@ -6,6 +6,7 @@ format: html
 # Dexseq vs Deseq analysis
 
 ```{r}
+set.seed(42)
 #converting to dataframe
 dxdResult_08_df <- readRDS("../data/dexseq_results_08_age.rds")
 dxdResult_77_df <- readRDS("../data/dexseq_results_77_age_sub.rds")
@@ -395,4 +396,51 @@ spearman_cor_77 <- cor(
   use = "complete.obs"
 )
 spearman_cor_77
+```
+
+```{r}
+dxdResult_77_age_subdf <- as.data.frame(readRDS("../data/dexseq_results_77_age_sub.rds"))
+dxdResult_77_gender_df <- as.data.frame(readRDS("../data/dexseq_results_77_sub.rds"))
+dxdResult_08_gender_df <- as.data.frame(readRDS("../data/dexseq_results_08.rds"))
+dxdResult_08__gender_age_df <- as.data.frame(readRDS("../data/dexseq_results_08_age.rds"))
+```
+
+```{r}
+count_sig_genes_dexseq <- function(dex_df, alpha = 0.05) {
+  
+  dex_gene <- dex_df %>%
+    as_tibble() %>%
+    filter(!is.na(stat)) %>%                        # remove invalid rows
+    dplyr::select(
+      gene_id   = groupID,
+      isoform_id = featureID,
+      pvalue,
+      stat
+    ) %>%
+    group_by(gene_id) %>%
+    slice_min(order_by = pvalue, n = 1, with_ties = FALSE) %>%
+    ungroup() %>%
+    mutate(padj = p.adjust(pvalue, method = "fdr"))
+  
+  # Count significant genes
+  sum(dex_gene$padj < alpha, na.rm = TRUE)
+}
+
+
+```
+
+```{r}
+print(paste("dex77 with age and gender", count_sig_genes_dexseq(dxdResult_77_age_subdf)))
+```
+
+```{r}
+(paste("dex77 with gender", count_sig_genes_dexseq(dxdResult_77_gender_df)))
+```
+
+```{r}
+(paste("dex88 with age and gender", count_sig_genes_dexseq(dxdResult_08__gender_age_df)))
+```
+
+```{r}
+(paste("dex88 with gender", count_sig_genes_dexseq(dxdResult_08_gender_df)))
 ```
