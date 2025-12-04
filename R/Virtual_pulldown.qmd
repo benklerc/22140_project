@@ -23,7 +23,7 @@ load(file='/home/projects/22140/exercise7_data.Rdata')
 load(file='/home/projects/22140/exercise7_ppi.Rdata')
 deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
 dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
-
+integrated_08 <- readRDS("../data/integrated_08.rds")
 ```
 
 ```{r}
@@ -56,13 +56,27 @@ top_deseq2 <- sig_iso2 %>%
   slice_head(n = 100) %>%
   pull(groupID)
 
-# Define combined seeds
-seeds <- unique(c(top_dexseq, top_deseq2))
+#getting top 200 integrated genes
+sig_iso_integrated <- integrated_08 %>%
+  filter(!is.na(adj_joint_pval) & adj_joint_pval < alpha) %>%
+  filter(Genes %in% ppi_genes)
 
-print(paste("DEXSeq Seeds:", length(top_dexseq)))
-print(paste("DESeq2 Seeds:", length(top_deseq2)))
-print(paste("Total Unique Seeds:", length(seeds)))
+top_integrated_08 <- integrated_08 %>%
+  arrange(adj_joint_pval) %>%
+  distinct(Genes, .keep_all = TRUE) %>%
+  slice_head(n = 200) %>%
+  pull(Genes)
+# Define combined seeds
+seeds <- top_integrated_08
+
+# print(paste("DEXSeq Seeds:", length(top_dexseq)))
+# print(paste("DESeq2 Seeds:", length(top_deseq2)))
+# print(paste("Total Unique Seeds:", length(seeds)))
+
+print(paste("Total unique seeds:", length(top_integrated_08)))
 ```
+
+**This means that the Dexseq and Deseq2 only share 1 of their top 100 significant genes???**
 
 ```{r}
 # Create full graph

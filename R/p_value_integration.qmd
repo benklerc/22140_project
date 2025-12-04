@@ -26,11 +26,11 @@ dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
 ```
 
 ```{r}
-diff_gene_expr_08 <- as.data.frame(res_gender_08) %>% 
+diff_gene_expr_08 <- as.data.frame(res_gender_age_08) %>% 
   dplyr::select(pvalue) %>% 
   rownames_to_column(var = 'Genes') %>% 
   dplyr::rename(deseq_08_pval = pvalue )
-diff_gene_expr_77 <- as.data.frame(res_gender_77) %>% 
+diff_gene_expr_77 <- as.data.frame(res_gender_age_77) %>% 
   dplyr::select(pvalue) %>% 
   rownames_to_column(var = 'Genes') %>% 
   dplyr::rename(deseq_77_pval = pvalue)
@@ -52,6 +52,7 @@ diff_transcript_expr_77 <- as.data.frame(dxdResult_77) %>%
 dim(diff_gene_expr_08)
 dim(diff_transcript_expr_08)
 dim(diff_transcript_expr_77)
+dim(diff_gene_expr_77)
 ```
 
 ```{r}
@@ -111,12 +112,142 @@ unique_joint
 
 ```
 
-# Integration within Transcripts(Fishers)
+# Integration within Levels
 
-# Gene Counts
+## Transcripts(Edingtons)
+
+### Gene Counts
 
 ```{r}
-
+gene_diff_analysis <- diff_gene_expr_08 %>% 
+  inner_join(diff_gene_expr_77, by = 'Genes') %>% 
+  na.omit()
+dim(gene_diff_analysis)
 ```
 
-# Isoform Counts
+```{r}
+gene_diff_analysis <- gene_diff_analysis |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher = metap::sump(c(deseq_08_pval, deseq_77_pval))$p  ) |>
+  ungroup()
+```
+
+### Isoform Counts
+
+```{r}
+isoform_diff_analysis <-diff_transcript_expr_08 %>% 
+  inner_join(diff_transcript_expr_77, by = 'Genes') %>% 
+  na.omit()
+dim(isoform_diff_analysis)
+```
+
+```{r}
+isoform_diff_analysis <- isoform_diff_analysis |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher = metap::sumlog(c( dexseq_08_pval, dexseq_77_pval))$p  ) |>
+  ungroup()
+```
+
+## Joining Isoform and Gene counts(fishers)
+
+```{r}
+isoform_diff_analysis <- isoform_diff_analysis |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher = metap::sumlog(c( dexseq_08_pval, dexseq_77_pval))$p  ) |>
+  ungroup()
+```
+
+# Joining Datasets first
+
+## Within Datasets (Fishers)
+
+### 08
+
+```{r}
+diff_analysis_08 <- diff_gene_expr_08 %>% 
+  inner_join(diff_transcript_expr_08, by = 'Genes') %>% 
+  na.omit()
+dim(diff_analysis_08)
+```
+
+```{r}
+int_diff_analysis_08 <- diff_analysis_08 |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher_08 = metap::sumlog(c( deseq_08_pval, dexseq_08_pval))$p,
+  adj_joint_pval = p.adjust(joint_pval_fisher_08)) |>
+  ungroup()
+```
+
+```{r}
+int_diff_analysis_08 %>% 
+  filter(adj_joint_pval<0.05)
+```
+
+### 77
+
+```{r}
+diff_analysis_77 <-diff_gene_expr_77 %>% 
+  inner_join(diff_transcript_expr_77, by = 'Genes') %>% 
+  na.omit()
+dim(diff_analysis_77)
+```
+
+```{r}
+int_diff_analysis_77 <- diff_analysis_77 |>
+  rowwise() |>
+  mutate(
+  joint_pval_fisher_77 = metap::sumlog(c( deseq_77_pval, dexseq_77_pval))$p,
+  adj_joint_pval = p.adjust()) |>
+  ungroup()
+```
+
+```{r}
+int_diff_analysis_77 %>% filter(joint_pval_fisher_77 <0.05)
+```
+
+## Across Datasets(edingtons)
+
+```{r}
+full_diff_analysis <- int_diff_analysis_08 %>% 
+  dplyr::select(Genes, joint_pval_fisher_08) %>% 
+  dplyr::inner_join(int_diff_analysis_77 %>% dplyr::select(Genes, joint_pval_fisher_77), by='Genes')
+  
+```
+
+```{r}
+full_diff_analysis <- full_diff_analysis |>
+  rowwise() |>
+  mutate(
+  joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p  ) |>
+  ungroup()
+```
+
+```{r}
+full_diff_analysis %>% filter(joint_pval_edingtons<0.05)
+```
+
+## Save Object for further Analysis
+
+```{r}
+int_diff_analysis_77_joint <- int_diff_analysis_77 %>% dplyr::select(Genes, joint_pval_fisher_77)
+int_diff_analysis_08_joint <- int_diff_analysis_08 %>% dplyr::select(Genes, joint_pval_fisher_08)
+
+saveRDS(int_diff_analysis_77_joint, file = "../data/integrated_77.rds")
+saveRDS(int_diff_analysis_08_joint, file = "../data/integrated_08.rds")
+```
+
+# GSEA
+
+```{r}
+library(fgsea)
+library(msigdbr)
+```
+
+```{r}
+BP_df = msigdbr(species = "human", category = "C5", subcategory = "BP")
+BP_list = split(BP_df$ensembl_gene, BP_df$gs_name)
+```

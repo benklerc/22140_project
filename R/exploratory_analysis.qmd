@@ -130,10 +130,6 @@ dim(isoform_count_77_sub)
 # Load Result files
 
 ```{r}
-
-```
-
-```{r}
 res_gender_age_08 <- readRDS('../data/deseq2_results_08_age.rds')
 res_gender_age_77 <- readRDS('../data/deseq2_results_77_age_sub.rds') 
 dxdResult_08 <- readRDS('../data/dexseq_results_08_age.rds') 
@@ -172,14 +168,12 @@ plot_08_gender_by_group <- metadata_df_08 |>
   theme_minimal() +
   scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",       # Your desired teal/mint
-      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+      "healthy" = "skyblue",     
+      "parkinson's" = "#0066CC"   
     )
   )
 
-
 print(plot_08_gender_by_group)
-
 
 # Age Distribution by Group (Density Plot)
 plot_08_age_by_group <- metadata_df_08 |>
@@ -194,8 +188,8 @@ plot_08_age_by_group <- metadata_df_08 |>
   theme_minimal() +
     scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",       # Your desired teal/mint
-      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+      "healthy" = "skyblue",    
+      "parkinson's" = "#0066CC"  
     )
   ) +
   # === FIX: Manually set x-axis limits for padding ===
@@ -210,7 +204,7 @@ print(plot_08_age_by_group)
 # ==============================================================================
 
 # Gender Distribution by Group (Bar Plot)
-plot_77_gender_by_group <- metadata_df_77_sub |>
+plot_77_gender_by_group <- metadata_df_77 |>
   ggplot(aes(x = gender, fill = groups)) +
   geom_bar(position = "dodge") +
   labs(
@@ -222,16 +216,15 @@ plot_77_gender_by_group <- metadata_df_77_sub |>
   theme_minimal() +
     scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",       # Your desired teal/mint
-      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+      "healthy" = "skyblue",      
+      "parkinson's" = "#0066CC"   
     )
   )
 
 print(plot_77_gender_by_group)
 
-
 # Age Distribution by Group (Density Plot)
-plot_77_age_by_group <- metadata_df_77_sub |>
+plot_77_age_by_group <- metadata_df_77 |>
   ggplot(aes(x = age, fill = groups)) +
   geom_density(alpha = 0.5) + # alpha=0.5 allows overlapping curves to be visible
   labs(
@@ -243,13 +236,13 @@ plot_77_age_by_group <- metadata_df_77_sub |>
   theme_minimal() +
     scale_fill_manual(
     values = c(
-      "healthy" = "skyblue",       # Your desired teal/mint
-      "parkinson's" = "#0066CC"    # A close hex code for the salmon/orange
+      "healthy" = "skyblue",      
+      "parkinson's" = "#0066CC"    
     )
   ) +
   # === FIX: Manually set x-axis limits for padding ===
-  scale_x_continuous(limits = c(min(metadata_df_77_sub$age, na.rm = TRUE) - 10, 
-                                max(metadata_df_77_sub$age, na.rm = TRUE) + 10))
+  scale_x_continuous(limits = c(min(metadata_df_77$age, na.rm = TRUE) - 10, 
+                                max(metadata_df_77$age, na.rm = TRUE) + 10))
 
 print(plot_77_age_by_group)
 
