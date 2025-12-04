@@ -136,6 +136,8 @@ minSize = 15, maxSize = 500, scoreType = "std")
 
 ```
 
+## FGsea results 88
+
 ```{r}
 sig_deseq_08 <- fg_deseq_08 %>% filter(padj < alpha) %>% arrange(padj)
 sig_dex_08 <- fg_dex_08 %>% filter(padj < alpha) %>% arrange(padj)
@@ -299,7 +301,7 @@ stats_dex_77 <- stats_dex_77[!is.na(stats_dex_77)]
 stats_dex_77 <- sort(stats_dex_77, decreasing = TRUE)
 ```
 
-10) fgseaMultilevel for DESeq2 and DEXSeq
+## fgseaMultilevel for DESeq2 and DEXSeq 77
 
 ```{r}
 fg_deseq_77 <- fgseaMultilevel(
