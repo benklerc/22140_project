@@ -21,8 +21,10 @@ Joined(inner) dataset with p values from both datsets(08, 77) and both analysis(
 
 ```{r}
 
-deseq2Result_08 <- readRDS("../data/deseq2_results_08.rds")
-dxdResult_08 <- readRDS("../data/dexseq_results_08.rds")
+res_gender_age_08 <- readRDS("../data/deseq2_results_08_age.rds")
+dxdResult_08 <- readRDS("../data/dexseq_results_08_age.rds")
+dxdResult_77 <- readRDS("../data/dexseq_results_77_age.rds")
+res_gender_age_77 <- readRDS("../data/deseq2_results_77_age.rds")
 ```
 
 ```{r}
@@ -219,12 +221,19 @@ full_diff_analysis <- int_diff_analysis_08 %>%
 ```
 
 ```{r}
-full_diff_analysis <- full_diff_analysis |>
-  rowwise() |>
+full_diff_analysis <- full_diff_analysis %>%
+  rowwise() %>%
   mutate(
   joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p,
   adj_joint_pval = p.adjust(joint_pval_edingtons, method = 'BH')) |>
+
   ungroup()
+
+# full_diff_analysis <- full_diff_analysis |>
+#   rowwise() |>
+#   dplyr::mutate(
+#   joint_pval_edingtons = metap::sump(c( joint_pval_fisher_08, joint_pval_fisher_77))$p  ) |>
+#   ungroup()
 ```
 
 ```{r}
